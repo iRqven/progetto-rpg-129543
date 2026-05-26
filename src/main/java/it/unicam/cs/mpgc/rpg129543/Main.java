@@ -6,6 +6,7 @@ import it.unicam.cs.mpgc.rpg129543.model.*;
 import it.unicam.cs.mpgc.rpg129543.persistence.PersistenceManager;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -18,34 +19,41 @@ import javafx.stage.Stage;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Classe di ingresso principale dell'applicazione.
+ * Coordina il ciclo di rendering visivo e intercetta l'input dell'utente
+ * delegando le operazioni logiche ai rispettivi Controller e Modelli.
+ */
 public class Main extends Application {
-    // Logica e Stato
     private Player player;
     private GameState gameState;
     private final PersistenceManager persistence = new PersistenceManager();
     private final Set<javafx.scene.input.KeyCode> pressedKeys = new HashSet<>();
     private boolean isInteracting = false;
     private boolean isMenuOpen = false;
-    private final int VALORE_PENALITA = 15;
 
-    // Motore di Combattimento
+    private static final int VALORE_PENALITA = 15;
+    private static final double HP_BAR_WIDTH = 40;
+
     private BattleEngine currentBattle;
     private Enemy currentEnemy;
 
-    // Componenti Grafici
     private Pane gameArea;
     private Group playerGroup;
     private Group playerSpriteShape;
     private Rectangle hpBar;
     private VBox interactionOverlay;
-    private final double HP_BAR_WIDTH = 40;
     private Label karmaLabel, levelLabel;
 
     @Override
     public void start(Stage primaryStage) {
-        Player savedPlayer = persistence.load();
-        this.player = (savedPlayer != null) ? savedPlayer : new Player("Anima", "Ombra", "Viandante");
-        if (savedPlayer == null) { this.player.setHp(100); this.player.setKarma(0); }
+        this.player = persistence.load().orElseGet(() -> {
+            Player nuovoPlayer = new Player("Anima", "Ombra", "Viandante");
+            nuovoPlayer.setHp(100);
+            nuovoPlayer.setKarma(0);
+            return nuovoPlayer;
+        });
+
         this.gameState = new GameState(player);
 
         gameArea = new Pane();
@@ -113,39 +121,60 @@ public class Main extends Application {
         interactionOverlay.setLayoutX(175); interactionOverlay.setLayoutY(125);
         interactionOverlay.setStyle("-fx-background-color: rgba(0,0,0,0.95); -fx-border-color: #f1c40f; -fx-padding: 25; -fx-border-radius: 15;");
 
-        Label name = new Label("L'Ombra del Passato");
-        name.setStyle("-fx-text-fill: #9b59b6; -fx-font-size: 20px; -fx-font-weight: bold;");
+        if (challenge instanceof NarrativeChallenge) {
+            Label name = new Label("Presenza Silenziosa");
+            name.setStyle("-fx-text-fill: #3498db; -fx-font-size: 20px; -fx-font-weight: bold;");
 
-        Label dialog = new Label("\"Viandante... la fuga ha un prezzo, ma il pentimento restituisce forza al cuore.\"");
-        dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
-        dialog.setWrapText(true);
+            Label dialog = new Label(challenge.risolvi(player));
+            dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+            dialog.setWrapText(true);
 
-        Button fightBtn = new Button("LOTTA (Pentimento)");
-        Button ignoreBtn = new Button("IGNORA (-" + VALORE_PENALITA + " Karma)");
+            Button proceedBtn = new Button("Prosegui il Cammino");
+            proceedBtn.setStyle("-fx-base: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold;");
+            proceedBtn.setOnAction(e -> {
+                currentRoom.setSfidaGestita(true);
+                gameArea.getChildren().remove(interactionOverlay);
+                player.setX(player.getX() - 60);
+                isInteracting = false;
+                refreshRoomGraphics();
+            });
 
-        fightBtn.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
-        ignoreBtn.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
+            interactionOverlay.getChildren().addAll(name, dialog, proceedBtn);
+        } else {
+            Label name = new Label("L'Ombra del Passato");
+            name.setStyle("-fx-text-fill: #9b59b6; -fx-font-size: 20px; -fx-font-weight: bold;");
 
-        ignoreBtn.setOnAction(e -> {
-            if (!currentRoom.isKarmaGiaTolto()) {
-                player.addKarma(-VALORE_PENALITA);
-                currentRoom.setKarmaGiaTolto(true);
-                updateStatusBar();
-            }
-            currentRoom.setSfidaGestita(true);
-            finishInteraction("Hai scelto l'indifferenza. La porta è aperta.");
-        });
+            Label dialog = new Label("\"Viandante... la fuga ha un prezzo, ma il pentimento restituisce forza al cuore.\"");
+            dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+            dialog.setWrapText(true);
 
-        fightBtn.setOnAction(e -> {
-            if (currentRoom.isKarmaGiaTolto()) {
-                player.addKarma(VALORE_PENALITA);
-                currentRoom.setKarmaGiaTolto(false);
-                updateStatusBar();
-            }
-            showBattleTutorial(challenge);
-        });
+            Button fightBtn = new Button("LOTTA (Pentimento)");
+            Button ignoreBtn = new Button("IGNORA (-" + VALORE_PENALITA + " Karma)");
 
-        interactionOverlay.getChildren().addAll(name, dialog, fightBtn, ignoreBtn);
+            fightBtn.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+            ignoreBtn.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
+
+            ignoreBtn.setOnAction(e -> {
+                if (!currentRoom.isKarmaGiaTolto()) {
+                    player.addKarma(-VALORE_PENALITA);
+                    currentRoom.setKarmaGiaTolto(true);
+                    updateStatusBar();
+                }
+                currentRoom.setSfidaGestita(true);
+                finishInteraction("Hai scelto l'indifferenza. La porta è aperta.");
+            });
+
+            fightBtn.setOnAction(e -> {
+                if (currentRoom.isKarmaGiaTolto()) {
+                    player.addKarma(VALORE_PENALITA);
+                    currentRoom.setKarmaGiaTolto(false);
+                    updateStatusBar();
+                }
+                showBattleTutorial(challenge);
+            });
+
+            interactionOverlay.getChildren().addAll(name, dialog, fightBtn, ignoreBtn);
+        }
         gameArea.getChildren().add(interactionOverlay);
     }
 
@@ -158,18 +187,28 @@ public class Main extends Application {
                 "🔵 PAZIENZA batte Aura RABBIA\n" +
                 "🔴 CORAGGIO batte Aura PAURA\n" +
                 "🟡 PERDONO batte Aura COLPA\n\n" +
-                "DIFESA riduce i danni e rigenera Volontà.\n" +
-                "CURA ripristina la tua salute.");
+                "DIFESA riduce i danni e rigenera molta Volontà.\n" +
+                "CURA ripristina la tua salute terrena.\n" +
+                "Attenzione agli Imprevisti casuali della Nebbia!");
         desc.setStyle("-fx-text-fill: white; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
         desc.setWrapText(true);
 
         Button startBtn = new Button("Inizia lo scontro");
         startBtn.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
         startBtn.setOnAction(e -> {
-            BattleEngine.BossMood debolezza = BattleEngine.BossMood.values()[(int)(Math.random()*3)];
+            BattleEngine.BossMood debolezza = BattleEngine.BossMood.values()[(int)(Math.random() * 3)];
             currentBattle = new BattleEngine(debolezza);
-            currentEnemy = new Enemy("Rimorso Inquieto", 100, "PERDONO");
-            updateBattleUI("Lo scontro ha inizio!");
+
+            String nomeBoss = (challenge instanceof CombatChallenge) ? ((CombatChallenge) challenge).getDescrizioneDettagliata() : "Rimorso Inquieto";
+            currentEnemy = new Enemy(nomeBoss, 100, debolezza.name());
+
+            String spiegazioneIniziale = switch (currentBattle.getCurrentMood()) {
+                case RABBIA -> "Lo scontro ha inizio! Lo spettro emana RABBIA. Canalizza la PAZIENZA per colpirlo al cuore.";
+                case PAURA -> "Lo scontro ha inizio! Lo spettro emana PAURA. Canalizza il CORAGGIO per resistergli.";
+                case COLPA -> "Lo scontro ha inizio! Lo spettro emana COLPA. Canalizza il PERDONO per dissiparlo.";
+            };
+
+            updateBattleUI(spiegazioneIniziale);
         });
 
         interactionOverlay.getChildren().addAll(t, desc, startBtn);
@@ -183,48 +222,68 @@ public class Main extends Application {
         Label auraLabel = new Label(" AURA NEMICA: " + currentBattle.getCurrentMood() + " ");
         auraLabel.setStyle("-fx-background-color: " + getMoodColor(currentBattle.getCurrentMood()) + "; -fx-text-fill: black; -fx-font-weight: bold;");
 
-        Label stats = new Label("HP: " + player.getHp() + "/100  |  VOLONTÀ: " + currentBattle.getVolonta());
+        Label stats = new Label("HP: " + player.getHp() + "/100  |  VOLONTÀ: " + currentBattle.getVolonta() + "/8");
         stats.setStyle("-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 14px;");
 
         Label log = new Label(logText);
         log.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
-        log.setWrapText(true); log.setMinHeight(60);
+        log.setWrapText(true); log.setMinHeight(75);
 
         GridPane menuLotta = new GridPane();
-        menuLotta.setHgap(15); menuLotta.setVgap(15); menuLotta.setAlignment(Pos.CENTER);
+        menuLotta.setHgap(10); menuLotta.setVgap(10); menuLotta.setAlignment(Pos.CENTER);
 
-        Button btnAtk = new Button("LOTTA (-1V)");
-        Button btnDef = new Button("DIFESA (+1V)");
-        Button btnCur = new Button("CURA (-2V)");
-        Button btnFug = new Button("FUGA");
+        // REATTIVITÀ DELLA VIEW: Cambiamo i bottoni a schermo se un'anomalia interattiva è attiva
+        if (currentBattle.getAnomalieEngine().isImprevistoAttivo()) {
+            log.setText(currentBattle.getAnomalieEngine().getTestoBivio());
 
-        String styleBtn = "-fx-min-width: 130; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
-        btnAtk.setStyle(styleBtn + "-fx-base: #c0392b;");
-        btnDef.setStyle(styleBtn + "-fx-base: #27ae60;");
-        btnCur.setStyle(styleBtn + "-fx-base: #f1c40f;");
-        btnFug.setStyle(styleBtn + "-fx-base: #7f8c8d;");
+            Button btnAccetta = new Button("ACCETTA PATTO (Opzione A)");
+            Button btnRifiuta = new Button("RIFIUTA PATTO (Opzione B)");
 
-        btnAtk.setOnAction(e -> processBattle("ATTACCO"));
-        btnDef.setOnAction(e -> processBattle("DIFESA"));
-        btnCur.setOnAction(e -> processBattle("CURA"));
-        btnFug.setOnAction(e -> {
-            if (!gameState.getCurrentRoom().isKarmaGiaTolto()) {
-                player.addKarma(-VALORE_PENALITA);
-                gameState.getCurrentRoom().setKarmaGiaTolto(true);
-            }
-            gameState.getCurrentRoom().setSfidaGestita(true);
-            finishInteraction("Sei fuggito dal combattimento.");
-        });
+            String styleBivio = "-fx-min-width: 180; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
+            btnAccetta.setStyle(styleBivio + "-fx-base: #c0392b; -fx-text-fill: white;");
+            btnRifiuta.setStyle(styleBivio + "-fx-base: #7f8c8d; -fx-text-fill: white;");
 
-        menuLotta.add(btnAtk, 0, 0); menuLotta.add(btnDef, 1, 0);
-        menuLotta.add(btnCur, 0, 1); menuLotta.add(btnFug, 1, 1);
+            btnAccetta.setOnAction(e -> processBattle("ACCETTA_PATTO"));
+            btnRifiuta.setOnAction(e -> processBattle("RIFIUTA_PATTO"));
+
+            menuLotta.add(btnAccetta, 0, 0);
+            menuLotta.add(btnRifiuta, 1, 0);
+        } else {
+            Button btnPaz = new Button("PAZIENZA (-2V)");
+            Button btnCor = new Button("CORAGGIO (-2V)");
+            Button btnPer = new Button("PERDONO (-2V)");
+            Button btnDef = new Button("DIFESA (+3V)");
+            Button btnCur = new Button("CURA (-3V)");
+            Button btnFug = new Button("FUGA");
+
+            String styleBtn = "-fx-min-width: 130; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
+            btnPaz.setStyle(styleBtn + "-fx-base: #2980b9; -fx-text-fill: white;");
+            btnCor.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
+            btnPer.setStyle(styleBtn + "-fx-base: #f39c12; -fx-text-fill: white;");
+            btnDef.setStyle(styleBtn + "-fx-base: #27ae60;");
+            btnCur.setStyle(styleBtn + "-fx-base: #8e44ad;");
+            btnFug.setStyle(styleBtn + "-fx-base: #7f8c8d;");
+
+            btnPaz.setOnAction(e -> processBattle("PAZIENZA"));
+            btnCor.setOnAction(e -> processBattle("CORAGGIO"));
+            btnPer.setOnAction(e -> processBattle("PERDONO"));
+            btnDef.setOnAction(e -> processBattle("DIFESA"));
+            btnCur.setOnAction(e -> processBattle("CURA"));
+            btnFug.setOnAction(e -> {
+                gameState.getCurrentRoom().setSfidaGestita(true);
+                finishInteraction("Sei fuggito sacrificando la tua determinazione.");
+            });
+
+            menuLotta.add(btnPaz, 0, 0); menuLotta.add(btnCor, 1, 0); menuLotta.add(btnPer, 2, 0);
+            menuLotta.add(btnDef, 0, 1); menuLotta.add(btnCur, 1, 1); menuLotta.add(btnFug, 2, 1);
+        }
 
         interactionOverlay.getChildren().addAll(auraLabel, stats, log, menuLotta);
 
         if (currentEnemy.getHp() <= 0) {
             player.addKarma(30); player.setHp(Math.min(100, player.getHp() + 25));
             gameState.getCurrentRoom().solveChallenge();
-            finishInteraction("VITTORIA! Il Rimorso svanisce. Recuperi energie.");
+            finishInteraction("VITTORIA! Il Rimorso è purificato. Recuperi energie vitali.");
         } else if (player.getHp() <= 0) {
             finishInteraction("L'OSCURITÀ TI HA CONSUMATO...");
             resetGame();
@@ -255,7 +314,10 @@ public class Main extends Application {
         resumeBtn.setStyle(btnStyle); saveExitBtn.setStyle(btnStyle); resetBtn.setStyle(btnStyle + "-fx-base: #c0392b;");
 
         resumeBtn.setOnAction(e -> togglePauseMenu());
-        saveExitBtn.setOnAction(e -> { persistence.save(player); System.exit(0); });
+        saveExitBtn.setOnAction(e -> {
+            persistence.save(player);
+            Platform.exit();
+        });
         resetBtn.setOnAction(e -> showResetWarning());
 
         interactionOverlay.getChildren().addAll(menuTitle, resumeBtn, saveExitBtn, resetBtn);

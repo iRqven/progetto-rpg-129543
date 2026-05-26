@@ -2,24 +2,27 @@ package it.unicam.cs.mpgc.rpg129543.controller;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.model.Player;
-import java.util.Random;
+import java.util.Objects;
 
+/**
+ * Controller di mediazione delegato alla gestione degli incontri e delle sfide ambientali.
+ * Raccoglie l'input della View ed esegue i contratti astratti del modello.
+ */
 public class EncounterController {
-    private final Random random = new Random();
 
-    public String handleChoice(Player player, Challenge challenge, boolean wantsToHelp) {
-        if (!wantsToHelp) {
-            player.addKarma(-10); // Punizione morale per l'indifferenza
-            return "Hai deciso di ignorare la richiesta. Il Purgatorio si fa più freddo.";
-        }
+    /**
+     * Gestisce l'interazione tra il giocatore e una sfida generica sfruttando il polimorfismo.
+     *
+     * @param player    Il protagonista dell'azione.
+     * @param challenge La sfida astratta da avviare.
+     * @return Il testo narrativo dell'esito da mostrare nella View.
+     */
+    public String gestisciIncontro(Player player, Challenge challenge) {
+        // Clausole di guardia per evitare NullPointerException a run-time
+        Objects.requireNonNull(player, "Il giocatore non può essere nullo durante un incontro.");
+        Objects.requireNonNull(challenge, "La sfida da gestire non può essere nulla.");
 
-        int roll = random.nextInt(20) + 1; // Lancio del dado D20
-        if (challenge.attempt(player, roll)) {
-            player.addKarma(challenge.getKarmaReward());
-            return "Risultato Dado: " + roll + " -> SUCCESSO! " + challenge.getSuccessMessage();
-        } else {
-            player.takeDamage(10); // Fallire una sfida morale ferisce l'anima (HP)
-            return "Risultato Dado: " + roll + " -> FALLIMENTO. " + challenge.getFailureMessage();
-        }
+        // Il controller non fa calcoli di dadi o modifiche dirette, delega tutto alla sfida astratta
+        return challenge.risolvi(player);
     }
 }

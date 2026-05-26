@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
+import java.util.Objects;
 
 /**
  * Rappresenta una stanza del Purgatorio.
@@ -33,6 +34,18 @@ public class Room {
     public Room(int id, String nome, String descrizione, Challenge sfida,
                 double npcX, double npcY, double doorX, double doorY,
                 String ricordoSbloccato, double fragX, double fragY, boolean hasFragment) {
+
+        // Clausole di guardia per la programmazione difensiva (Punto 4)
+        if (id < 0) {
+            throw new IllegalArgumentException("L'ID della stanza non può essere negativo.");
+        }
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("Il nome della stanza non può essere nullo o vuoto.");
+        }
+        if (descrizione == null || descrizione.isBlank()) {
+            throw new IllegalArgumentException("La descrizione della stanza non può essere nulla o vuota.");
+        }
+
         this.id = id;
         this.nome = nome;
         this.descrizione = descrizione;
@@ -61,9 +74,13 @@ public class Room {
     public Challenge sfida() { return sfida; }
     public boolean hasChallenge() { return sfida != null; }
 
-    /** Rimuove il boss dalla stanza (chiamato dopo vittoria) */
+    /** * Gestisce il completamento della sfida (chiamato dopo una vittoria).
+     * Sfrutta l'architettura polimorfica per aggiornare lo stato interno del boss.
+     */
     public void solveChallenge() {
-        this.sfida = null;
+        if (sfida instanceof CombatChallenge) {
+            ((CombatChallenge) sfida).setCompletata(true);
+        }
         this.sfidaGestita = true;
     }
 

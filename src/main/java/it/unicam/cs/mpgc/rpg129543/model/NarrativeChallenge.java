@@ -4,36 +4,31 @@ import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import java.util.Objects;
 
 /**
- * Incontro puramente narrativo che sblocca frammenti di Lore e rivela il passato del protagonista.
+ * Gestisce i dialoghi puramente statici e di interazione testuale con i personaggi.
  */
 public class NarrativeChallenge implements Challenge {
-    private final String nomeSpirito;
-    private final String rivelazioneStoria;
-    private final String frammentoMemoria;
+    private final String nomeNPC;
+    private final String dialogo;
+    private final String oggettoRilasciato;
     private boolean completata;
 
-    public NarrativeChallenge(String nomeSpirito, String rivelazioneStoria, String frammentoMemoria) {
-        if (nomeSpirito == null || rivelazioneStoria == null || frammentoMemoria == null) {
-            throw new IllegalArgumentException("I parametri della sfida narrativa non possono essere nulli.");
-        }
-        this.nomeSpirito = nomeSpirito;
-        this.rivelazioneStoria = rivelazioneStoria;
-        this.frammentoMemoria = frammentoMemoria;
+    public NarrativeChallenge(String nomeNPC, String dialogo, String oggettoRilasciato) {
+        this.nomeNPC = Objects.requireNonNull(nomeNPC, "Il nome NPC non può essere nullo.");
+        this.dialogo = dialogo;
+        this.oggettoRilasciato = oggettoRilasciato;
         this.completata = false;
     }
 
     @Override
-    public String risolvi(Player player) {
-        Objects.requireNonNull(player, "Il giocatore non può essere nullo.");
+    public String risolvi(Player player, int pianoCorrente) {
+        Objects.requireNonNull(player, "Player nullo durante la risoluzione narrativa.");
+        this.completata = true;
 
-        if (!completata) {
-            player.addRicordo(frammentoMemoria);
-            this.completata = true;
-        }
-
-        return "💡 " + nomeSpirito + " ti parla:\n\"" + rivelazioneStoria + "\"\n\n[Nuovo indizio aggiunto ai tuoi Ricordi!]";
+        return nomeNPC.toUpperCase() + ":\n" + dialogo + "\n\n[Sblocchi l'indizio: " + oggettoRilasciato + "]";
     }
 
     @Override
-    public boolean isCompletata() { return completata; }
+    public boolean isCompletata() {
+        return this.completata;
+    }
 }

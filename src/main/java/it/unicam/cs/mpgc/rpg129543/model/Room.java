@@ -78,6 +78,9 @@ public class Room {
      * Sfrutta l'architettura polimorfica per aggiornare lo stato interno del boss.
      */
     public void solveChallenge() {
+        // Blocco di sicurezza per evitare ri-esecuzioni
+        if (this.sfidaGestita) return;
+
         if (sfida instanceof CombatChallenge) {
             ((CombatChallenge) sfida).setCompletata(true);
         }

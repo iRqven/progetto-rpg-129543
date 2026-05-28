@@ -19,10 +19,6 @@ import javafx.stage.Stage;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Classe di ingresso principale dell'applicazione.
- * Coordina il ciclo di rendering visivo e gestisce la UI ad albero e a comparsa.
- */
 public class Main extends Application {
     private Player player;
     private GameState gameState;
@@ -43,8 +39,6 @@ public class Main extends Application {
     private Group playerSpriteShape;
     private Rectangle hpBar;
     private VBox interactionOverlay;
-
-    // Riferimenti HUD per aggiornamenti puliti ed allineati
     private Label labelKarma, labelLivello, labelPiano;
 
     @Override
@@ -57,7 +51,6 @@ public class Main extends Application {
         });
 
         this.gameState = new GameState(player);
-
         gameArea = new Pane();
         gameArea.setPrefSize(800, 600);
         createPlayerGraphics();
@@ -127,7 +120,7 @@ public class Main extends Application {
             Label name = new Label("Presenza Silenziosa");
             name.setStyle("-fx-text-fill: #3498db; -fx-font-size: 20px; -fx-font-weight: bold;");
 
-            Label dialog = new Label(challenge.risolvi(player));
+            Label dialog = new Label(challenge.risolvi(player, currentRoom.id()));
             dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
             dialog.setWrapText(true);
 
@@ -136,7 +129,7 @@ public class Main extends Application {
             proceedBtn.setOnAction(e -> {
                 currentRoom.setSfidaGestita(true);
                 gameArea.getChildren().remove(interactionOverlay);
-                player.setX(player.getX() - 60);
+                repelPlayer(currentRoom);
                 isInteracting = false;
                 refreshRoomGraphics();
             });
@@ -180,31 +173,92 @@ public class Main extends Application {
         gameArea.getChildren().add(interactionOverlay);
     }
 
+    private void finishInteraction(String text) {
+        interactionOverlay.getChildren().clear();
+        Room currentRoom = gameState.getCurrentRoom();
+        Label l = new Label(text); l.setStyle("-fx-text-fill: #f1c40f; -fx-text-alignment: center; -fx-font-family: 'Georgia';"); l.setWrapText(true);
+        Button b = new Button("Prosegui"); b.setStyle("-fx-base: #2c3e50; -fx-text-fill: white;");
+        b.setOnAction(e -> {
+            gameArea.getChildren().remove(interactionOverlay);
+            isInteracting = false;
+            player.setX(player.getX() + 60); // <--- SPOSTA IL GIOCATORE VIA DAL BOSS
+            refreshRoomGraphics();
+        });
+        interactionOverlay.getChildren().addAll(l, b);
+    }
+
+    private void repelPlayer(Room room) {
+        if (player.getX() > room.npcX()) player.setX(player.getX() + 50);
+        else player.setX(player.getX() - 50);
+    }
+
     private void showBattleTutorial(Challenge challenge) {
         interactionOverlay.getChildren().clear();
-        Label t = new Label("SCONTRO DIRETTO SULL'ANIMA");
-        t.setStyle("-fx-text-fill: cyan; -fx-font-weight: bold; -fx-font-size: 18px;");
+        interactionOverlay.setSpacing(15);
 
-        Label desc = new Label("Il livello della stanza influisce sul potere dello Spettro.\n" +
-                "Puoi navigare nel menu tattico aprendo il ramo 'VIRTÙ'.\n" +
-                "Sconfiggere boss elargisce XP vitali per aumentare gli attributi.");
-        desc.setStyle("-fx-text-fill: white; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
-        desc.setWrapText(true);
+        String nomeBoss = (challenge instanceof CombatChallenge) ? ((CombatChallenge) challenge).getNomeNemico() : "Rimorso Inquieto";
+        String descBoss = (challenge instanceof CombatChallenge) ? ((CombatChallenge) challenge).getDescrizioneDettagliata() : "La nebbia si stringe.";
+
+        Label t = new Label("SVELAMENTO DELLA VITTIMA: " + nomeBoss.toUpperCase());
+        t.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 15px; -fx-font-family: 'Courier New';");
+
+        Label desc = new Label(descBoss);
+        desc.setStyle("-fx-text-fill: #bdc3c7; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia'; -fx-font-size: 13px;");
+        desc.setWrapText(true); desc.setMaxWidth(420);
+
+        VBox tutorialBox = new VBox(5);
+        tutorialBox.setAlignment(Pos.CENTER);
+        if (player.getLivello() == 1) {
+            Label tutTitolo = new Label("[REGISTRO DELLE DEBOLEZZE EMOTIVE]");
+            tutTitolo.setStyle("-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New';");
+
+            Label tutDesc = new Label(
+                    "Durante lo scontro, seleziona la Virtù che contrasta l'Aura cromatico-emotiva della vittima:\n" +
+                            "• Se lo stato è RABBIA -> Sferra PAZIENZA\n" +
+                            "• Se lo stato è PAURA  -> Sferra CORAGGIO\n" +
+                            "• Se lo stato è COLPA  -> Sferra PERDONO\n" +
+                            "Colpire l'Aura corretta raddoppia l'efficacia d'attacco e rigenera Volontà."
+            );
+            tutDesc.setStyle("-fx-text-fill: #ecf0f1; -fx-font-size: 11px; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+            tutDesc.setWrapText(true); tutDesc.setMaxWidth(420);
+            tutorialBox.getChildren().addAll(tutTitolo, tutDesc);
+        }
 
         Button startBtn = new Button("Inizia il Combattimento");
-        startBtn.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
+        startBtn.setStyle("-fx-base: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-min-height: 40;");
+
         startBtn.setOnAction(e -> {
-            BattleEngine.BossMood debolezza = BattleEngine.BossMood.values()[(int)(Math.random() * 3)];
-            currentBattle = new BattleEngine(debolezza);
+            BattleEngine.BossMood mood = BattleEngine.BossMood.values()[(int)(Math.random() * 3)];
+            currentBattle = new BattleEngine(mood);
             isInSubMenuVirtu = false;
 
-            String nomeBoss = (challenge instanceof CombatChallenge) ? ((CombatChallenge) challenge).getDescrizioneDettagliata() : "Rimorso Inquieto";
-            currentEnemy = new Enemy(nomeBoss, 100, debolezza.name());
+            String fRabbia = "Non te ne andrai con il mio bottino!";
+            String fPaura = "Il buio ci sta consumando entrambi...";
+            String fColpa = "Hai distrutto tutto quello che avevo.";
 
-            updateBattleUI("La nebbia si focalizza. Lo spettro ringhia ferocemente.");
+            if (nomeBoss.contains("Socio Tradito")) {
+                fRabbia = "Hai rubato la mia idea, ti sei arricchito sulle mie spalle, viscido parassita!";
+                fPaura = "Sento ancora l'odore di bruciato dei bilanci falsi della tua società fantasma...";
+                fColpa = "Mi fidavo di te... eravamo cresciuti insieme e mi hai addossato i tuoi debiti morali!";
+            } else if (nomeBoss.contains("Padre Disperato")) {
+                fRabbia = "Hai minacciato la mia famiglia con la tua sicurezza! Ti strapperò quel sorriso arrogante!";
+                fPaura = "Hai paura della mia mazza di ferro? Guarda cosa fa la disperazione di un padre!";
+                fColpa = "Mio figlio aveva bisogno di cure e tu hai rubato i nostri risparmi senza battere ciglio!";
+            } else if (nomeBoss.contains("Giovane Operaio")) {
+                fRabbia = "Ti sei preso i miei cinque anni di turni di notte in fabbrica per comprarti vestiti di lusso!";
+                fPaura = "Scappavi sulla banchina della stazione stringendo la valigia... ma da qui non scappi!";
+                fColpa = "Credevo alle tue promesse di un investimento sicuro... mi hai lasciato senza un futuro!";
+            } else if (nomeBoss.contains("Spettro del Complice")) {
+                fRabbia = "Mi hai spinto sotto le ruote del treno! Scudo umano... ecco cosa ero per te!";
+                fPaura = "L'orologio scatta... senti il fischio del treno delle 14:02 che arriva?!";
+                fColpa = "Abbiamo truffato mezza città insieme... come hai potuto tradirmi all'ultimo secondo?";
+            }
+
+            currentEnemy = new Enemy(nomeBoss, 100, mood.name(), fRabbia, fPaura, fColpa);
+            updateBattleUI("La nebbia si focalizza. Lo scontro ha inizio.");
         });
 
-        interactionOverlay.getChildren().addAll(t, desc, startBtn);
+        interactionOverlay.getChildren().addAll(t, desc, tutorialBox, startBtn);
     }
 
     private void updateBattleUI(String logText) {
@@ -224,7 +278,6 @@ public class Main extends Application {
 
         GridPane menuLotta = new GridPane();
         menuLotta.setHgap(10); menuLotta.setVgap(10); menuLotta.setAlignment(Pos.CENTER);
-
         String styleBtn = "-fx-min-width: 135; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
 
         if (currentBattle.getAnomalieEngine().isImprevistoAttivo()) {
@@ -238,7 +291,6 @@ public class Main extends Application {
 
             btnAccetta.setOnAction(e -> processBattle("ACCETTA_PATTO"));
             btnRifiuta.setOnAction(e -> processBattle("RIFIUTA_PATTO"));
-
             menuLotta.add(btnAccetta, 0, 0); menuLotta.add(btnRifiuta, 1, 0);
         } else if (isInSubMenuVirtu) {
             Button btnPaz = new Button("PAZIENZA (-2V)");
@@ -286,25 +338,17 @@ public class Main extends Application {
         if (currentEnemy.getHp() <= 0) {
             int premioXp = (gameState.getCurrentRoom().id() + 1) * 50;
             player.addKarma(30);
-
-            // Intercettiamo il segnale booleano di livellamento per attivare l'overlay a comparsa
             boolean haLivellato = player.addXp(premioXp);
             gameState.getCurrentRoom().solveChallenge();
 
-            if (haLivellato) {
-                showLevelUpNotification(premioXp);
-            } else {
-                finishInteraction("PURIFICATO! Sconfiggi lo spettro ed accumuli +" + premioXp + " XP.");
-            }
+            if (haLivellato) showLevelUpNotification(premioXp);
+            else finishInteraction("VITTORIA! Sconfiggi lo spettro ed accumuli +" + premioXp + " XP.");
         } else if (player.getHp() <= 0) {
             finishInteraction("L'OSCURITÀ TI HA CONSUMATO...");
             resetGame();
         }
     }
 
-    /**
-     * Mostra la notifica centrale a comparsa di Trascendenza dell'Anima (Baldur's Style)
-     */
     private void showLevelUpNotification(int xpGuadagnati) {
         interactionOverlay.getChildren().clear();
         interactionOverlay.setSpacing(20);
@@ -321,11 +365,13 @@ public class Main extends Application {
         desc.setStyle("-fx-text-fill: white; -fx-text-alignment: center; -fx-font-family: 'Georgia'; -fx-font-size: 14px;");
         desc.setWrapText(true);
 
+        Room currentRoom = gameState.getCurrentRoom();
         Button btnChiudi = new Button("Prendi Consapevolezza");
         btnChiudi.setStyle("-fx-min-width: 180; -fx-min-height: 40; -fx-base: #f1c40f; -fx-text-fill: black; -fx-font-weight: bold;");
+
         btnChiudi.setOnAction(e -> {
             gameArea.getChildren().remove(interactionOverlay);
-            player.setX(player.getX() - 60);
+            repelPlayer(currentRoom);
             isInteracting = false;
             refreshRoomGraphics();
         });
@@ -357,10 +403,7 @@ public class Main extends Application {
         resumeBtn.setStyle(btnStyle); saveExitBtn.setStyle(btnStyle); resetBtn.setStyle(btnStyle + "-fx-base: #c0392b;");
 
         resumeBtn.setOnAction(e -> togglePauseMenu());
-        saveExitBtn.setOnAction(e -> {
-            persistence.save(player);
-            Platform.exit();
-        });
+        saveExitBtn.setOnAction(e -> { persistence.save(player); Platform.exit(); });
         resetBtn.setOnAction(e -> showResetWarning());
 
         interactionOverlay.getChildren().addAll(menuTitle, resumeBtn, saveExitBtn, resetBtn);
@@ -392,29 +435,17 @@ public class Main extends Application {
         playerGroup = new Group(playerSpriteShape, hpBg, hpBar);
     }
 
-    /**
-     * Configura l'HUD di esplorazione superiore tramite una griglia bilanciata e priva di emoji.
-     */
     private GridPane createTopHud() {
         GridPane hud = new GridPane();
         hud.setAlignment(Pos.CENTER);
-        hud.setHgap(60);
-        hud.setPrefHeight(50);
+        hud.setHgap(60); hud.setPrefHeight(50);
         hud.setStyle("-fx-background-color: #1a1a24; -fx-border-color: #2c3e50; -fx-border-width: 0 0 2 0;");
 
-        labelKarma = new Label();
-        labelLivello = new Label();
-        labelPiano = new Label();
-
+        labelKarma = new Label(); labelLivello = new Label(); labelPiano = new Label();
         String styleText = "-fx-text-fill: #bdc3c7; -fx-font-weight: bold; -fx-font-family: 'Courier New'; -fx-font-size: 13px;";
-        labelKarma.setStyle(styleText);
-        labelLivello.setStyle(styleText);
-        labelPiano.setStyle(styleText);
+        labelKarma.setStyle(styleText); labelLivello.setStyle(styleText); labelPiano.setStyle(styleText);
 
-        hud.add(labelKarma, 0, 0);
-        hud.add(labelLivello, 1, 0);
-        hud.add(labelPiano, 2, 0);
-
+        hud.add(labelKarma, 0, 0); hud.add(labelLivello, 1, 0); hud.add(labelPiano, 2, 0);
         return hud;
     }
 
@@ -429,33 +460,62 @@ public class Main extends Application {
 
     private void checkInteractions() {
         Room current = gameState.getCurrentRoom();
-        if (current.hasChallenge()) {
-            double dist = Math.sqrt(Math.pow(player.getX() - current.npcX(), 2) + Math.pow(player.getY() - current.npcY(), 2));
-            if (dist < 45) { isInteracting = true; startChoiceMenu(current.sfida()); }
+        if (!current.hasChallenge() && !current.hasFragment()) return;
+
+        double distBoss = Math.sqrt(Math.pow(player.getX() - current.npcX(), 2) + Math.pow(player.getY() - current.npcY(), 2));
+        double distFrag = Math.sqrt(Math.pow(player.getX() - current.fragX(), 2) + Math.pow(player.getY() - current.fragY(), 2));
+
+        // PRIORITÀ 1: INTERAZIONE CON IL BOSS (Combattimento o Storia)
+        if (current.hasChallenge() && distBoss < 45 && !isInteracting) {
+            isInteracting = true;
+            if (current.isSfidaGestita()) {
+                showLoreOnly(current);
+            } else {
+                startChoiceMenu(current.sfida());
+            }
         }
-        if (current.hasFragment() && !player.getRicordi().contains(current.ricordoSbloccato())) {
-            double dist = Math.sqrt(Math.pow(player.getX() - current.fragX(), 2) + Math.pow(player.getY() - current.fragY(), 2));
-            if (dist < 30) { player.addRicordo(current.ricordoSbloccato()); showMemoryPopup(current.ricordoSbloccato()); }
+        // PRIORITÀ 2: FRAMMENTI DI MEMORIA (Solo se NON c'è interazione col boss in corso)
+        else if (current.hasFragment() && !player.getRicordi().contains(current.ricordoSbloccato()) && distFrag < 30 && !isInteracting) {
+            isInteracting = true;
+            player.addRicordo(current.ricordoSbloccato());
+            showMemoryPopup(current.ricordoSbloccato());
         }
+
+        // INTERAZIONE CON LA PORTA (Solo se la sfida è gestita)
         double distToDoor = Math.sqrt(Math.pow(player.getX() - current.doorX(), 2) + Math.pow(player.getY() - current.doorY(), 2));
         if (distToDoor < 45 && current.isSfidaGestita()) {
-            if (gameState.nextRoom()) { player.setX(50); player.setY(300); refreshRoomGraphics(); persistence.save(player); }
-            else showFinalJudgment();
+            if (gameState.nextRoom()) {
+                player.setX(50); player.setY(300); refreshRoomGraphics(); persistence.save(player);
+            } else {
+                showFinalJudgment();
+            }
         }
     }
 
-    private void processBattle(String mossa) {
-        String res = currentBattle.executeTurn(player, currentEnemy, mossa);
-        if (res.contains("violentemente")) applyDamageEffect();
-        updateBattleUI(res);
+    private void showLoreOnly(Room room) {
+        interactionOverlay.getChildren().clear();
+        Label l = new Label("PURIFICAZIONE\n\n" + room.descrizione() + "\n\nLa vittima ha trovato pace.");
+        l.setStyle("-fx-text-fill: #f1c40f; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+        l.setWrapText(true);
+        Button b = new Button("Chiudi");
+        b.setOnAction(e -> {
+            gameArea.getChildren().remove(interactionOverlay);
+            isInteracting = false;
+            player.setX(player.getX() + 60); // <--- SPOSTA IL GIOCATORE VIA DAL BOSS
+        });
+        interactionOverlay.getChildren().addAll(l, b);
+        gameArea.getChildren().add(interactionOverlay);
     }
 
-    private void finishInteraction(String text) {
-        interactionOverlay.getChildren().clear();
-        Label l = new Label(text); l.setStyle("-fx-text-fill: #f1c40f; -fx-text-alignment: center; -fx-font-family: 'Georgia';"); l.setWrapText(true);
-        Button b = new Button("Prosegui"); b.setStyle("-fx-base: #2c3e50; -fx-text-fill: white;");
-        b.setOnAction(e -> { gameArea.getChildren().remove(interactionOverlay); player.setX(player.getX() - 60); isInteracting = false; refreshRoomGraphics(); });
-        interactionOverlay.getChildren().addAll(l, b);
+    private void processBattle(String mossaInput) {
+        String mossaPulita = mossaInput.split(" ")[0].trim();
+
+        String res = currentBattle.executeTurn(player, currentEnemy, mossaPulita, gameState);
+
+        if (res.contains("violentemente")) {
+            applyDamageEffect();
+        }
+        updateBattleUI(res);
     }
 
     private void refreshRoomGraphics() {
@@ -504,13 +564,41 @@ public class Main extends Application {
     private void applyDamageEffect() { playerSpriteShape.setOpacity(0.4); javafx.animation.PauseTransition p = new javafx.animation.PauseTransition(javafx.util.Duration.millis(250)); p.setOnFinished(e -> playerSpriteShape.setOpacity(1.0)); p.play(); }
 
     private void showFinalJudgment() {
-        isInteracting = true; gameArea.getChildren().clear();
-        String v = (player.getKarma() >= 40) ? "PARADISO - Sei libero." : "INFERNO - Il peso ti ha vinto.";
-        VBox end = new VBox(30); end.setAlignment(Pos.CENTER); end.setPrefSize(800, 600); end.setStyle("-fx-background-color: black;");
-        Label r = new Label(v); r.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-family: 'Georgia';");
-        Button restartBtn = new Button("Ritorna nell'Oblio (Nuova Partita)"); restartBtn.setStyle("-fx-base: #2c3e50; -fx-text-fill: white;");
-        restartBtn.setOnAction(e -> resetGame());
-        end.getChildren().addAll(r, restartBtn); gameArea.getChildren().add(end);
+        isInteracting = true; gameArea.getChildren().clear(); pressedKeys.clear();
+        VBox endLayout = new VBox(25); endLayout.setAlignment(Pos.CENTER); endLayout.setPrefSize(800, 600); endLayout.setStyle("-fx-background-color: black; -fx-padding: 40;");
+
+        Label titoloOrologio = new Label("L'OROLOGIO DELLA STAZIONE SCATTA: 14:03");
+        titoloOrologio.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Courier New';");
+
+        Label rivelazioneGiudice = new Label(
+                "[ATTO II - IL COLPO DI SCENA]\n" +
+                        "Il Giudice scoppia a ridere nell'ombra dell'ufficio:\n" +
+                        "\"Pensavi davvero che questo fosse un Purgatorio e che quelle fossero sfide morali astratte? " +
+                        "Quella vecchia, quel ragazzo, il tuo complice... li hai truffati e uccisi tu in vita con il tuo cinismo! " +
+                        "Questo è l'Inferno. E tu non sei la vittima sotto esame... tu sei il loro supplizio, e loro sono il tuo.\"\n\n" +
+                        "[ATTO III - LE 14:03]\n" +
+                        "\"Alle 14:02 è arrivato il treno. Alle 14:03 sei morto dopo aver spinto il tuo complice sulle rotaie. Non c'è salvezza.\""
+        );
+        rivelazioneGiudice.setStyle("-fx-text-fill: #bdc3c7; -fx-font-size: 14px; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+        rivelazioneGiudice.setWrapText(true); rivelazioneGiudice.setMaxWidth(680);
+
+        Label esitoCondanna = new Label(); Button azioneBtn = new Button();
+        String styleCondanna = "-fx-font-size: 15px; -fx-font-weight: bold; -fx-font-family: 'Courier New'; -fx-text-alignment: center;";
+        String styleBtn = "-fx-min-width: 280; -fx-min-height: 45; -fx-font-weight: bold;";
+
+        if (player.getKarma() >= 40) {
+            esitoCondanna.setText("IL LOOP DELL'ILLUSIONE (Karma Alto)\nSei rispedito al Piano 1 con la memoria azzerata, costretto a soffrire per sempre credendo di poterti salvare.");
+            esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #3498db;");
+            azioneBtn.setText("Ricomincia l'Illusione"); azioneBtn.setStyle(styleBtn + "-fx-base: #2980b9; -fx-text-fill: white;");
+        } else {
+            esitoCondanna.setText("IL CARNEFICE CONSAPEVOLE (Karma Basso)\nDiventi il mostro definitivo delle stanze altrui, costretto a tormentare all'Inferno i tuoi stessi complici in un ciclo di odio eterno.");
+            esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #c0392b;");
+            azioneBtn.setText("Accetta il Ruolo di Carnefice"); azioneBtn.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
+        }
+
+        azioneBtn.setOnAction(e -> resetGame());
+        endLayout.getChildren().addAll(titoloOrologio, rivelazioneGiudice, esitoCondanna, azioneBtn);
+        gameArea.getChildren().add(endLayout);
     }
 
     private void resetGame() { this.player = new Player("Anima", "Ombra", "Viandante"); this.player.setHp(100); this.player.setKarma(0); this.gameState = new GameState(player); persistence.save(player); refreshRoomGraphics(); updateStatusBar(); isInteracting = false; showIntro(); }

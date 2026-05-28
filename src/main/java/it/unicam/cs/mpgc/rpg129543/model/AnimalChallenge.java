@@ -1,7 +1,6 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
-import it.unicam.cs.mpgc.rpg129543.model.Player;
 import java.util.Objects;
 
 /**
@@ -25,14 +24,13 @@ public class AnimalChallenge implements Challenge {
     }
 
     @Override
-    public String risolvi(Player player) {
+    public String risolvi(Player player, int pianoCorrente) {
         Objects.requireNonNull(player, "Impossibile risolvere la sfida per un giocatore nullo.");
 
         if (completata) {
             return DESCR_COMPLETATA;
         }
 
-        // Logica specifica: se il giocatore ha accumulato abbastanza esperienza morigerata, ammansisce la belva
         if (player.getKarma() >= 0) {
             player.addKarma(BONUS_KARMA_PIETA);
             this.completata = true;

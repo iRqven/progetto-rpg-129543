@@ -5,63 +5,36 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Rappresenta la sfida di interazione morale con l'Ombra di una Vecchia Signora.
- * Gestisce la logica di superamento della prova basandosi sulle statistiche del giocatore.
+ * Gestisce i controlli di abilità stocastici condizionati dal piano logico[cite: 27].
  */
 public class SkillCheckChallenge implements Challenge {
-    // Sostituzione dei Magic Numbers con costanti esplicite per il Clean Code
     private static final int SOGLIA_DIFFICOLTA = 12;
-    private static final int PREMIO_KARMA = 15;
-    private static final int MASSIMO_LANCIO_DADO = 20;
+    private static final int BONUS_KARMA = 15;
+    private static final int MAX_DICE = 20;
 
-    private final Random random;
-    private boolean completata;
+    private final Random random = new Random();
+    private boolean completata = false;
 
-    /**
-     * Costruttore della sfida. Inizializza lo stato e il generatore di numeri casuali.
-     */
-    public SkillCheckChallenge() {
-        this.random = new Random();
-        this.completata = false;
-    }
-
-    /**
-     * Risolve l'interazione con l'anziana calcolando l'esito tramite un lancio di dadi
-     * influenzato dal livello attuale del protagonista.
-     *
-     * @param player Il giocatore che affronta la sfida.
-     * @return Il testo descrittivo dell'esito da mostrare nell'interfaccia grafica.
-     */
     @Override
-    public String risolvi(Player player) {
-        // Clausola di guardia per la programmazione difensiva
-        Objects.requireNonNull(player, "Impossibile avviare la sfida per un giocatore nullo.");
+    public String risolvi(Player player, int pianoId) {
+        Objects.requireNonNull(player, "Il giocatore non puo essere nullo.");
+        if (completata) return "L'eco del passato si e spento tra i binari.";
 
-        if (completata) {
-            return "L'ombra della vecchia signora ha già trovato la sua strada oltre la nebbia.";
-        }
-
-        // Simulazione del lancio del dado (da 1 a 20) in linea con i sistemi RPG classici
-        int tiroDado = random.nextInt(MASSIMO_LANCIO_DADO) + 1;
-
-        // Applichiamo la tua formula: (Tiro + Livello) >= Difficoltà
-        boolean successo = (tiroDado + player.getLivello()) >= SOGLIA_DIFFICOLTA;
-
+        int tiro = random.nextInt(MAX_DICE) + 1;
+        boolean successo = (tiro + player.getLivello()) >= SOGLIA_DIFFICOLTA;
         this.completata = true;
 
+        String dialogo = (pianoId == 0) ?
+                "IL CAPOSTAZIONE:\n\"Ti ricordi di me? Camminavi sulla linea gialla ignorando i miei richiami, convinto che le regole non valessero per uno splendido uomo d'affari come te. Quando mi sono opposto ai tuoi traffici, mi hai fatto licenziare con false accuse, distruggendo la mia dignità. Ora sono io a terra. Vuoi piegare il tuo orgoglio per aiutarmi o passerai oltre pensando di essere superiore a un vecchio barbone?\"" :
+                "LA GENTILE ANZIANA:\n\"Ti fidavi di me, mi portavi i pasticcini a casa per convincermi a firmare la girata della mia pensione. Mi hai lasciato senza un soldo persino per fare la spesa. Ho passato gli ultimi mesi della mia vita a pane e acqua per colpa dei tuoi contratti. Ora c'è un'ultima razza di luce in questa stanza. La prenderai tutta per te o lancerai il dado per nutrirmi?\"";
+
         if (successo) {
-            player.addKarma(PREMIO_KARMA);
-            return "Risultato Dado: " + tiroDado + " (Livello +" + player.getLivello() + ") -> SUCCESSO!\n"
-                    + "L'hai aiutata. Un calore familiare ti avvolge. Sblocchi un ricordo d'infanzia.";
-        } else {
-            // Il fallimento non altera il karma negativamente, ma pesa sulla coscienza narrativa
-            return "Risultato Dado: " + tiroDado + " (Livello +" + player.getLivello() + ") -> FALLIMENTO.\n"
-                    + "Hai esitato o hai fallito. La vecchia svanisce nella nebbia. Il senso di colpa ti pesa.";
+            player.addKarma(BONUS_KARMA);
+            return dialogo + "\n\n[SUCCESSO - Lancio: " + tiro + "]\nHai trovato la forza di superare il tuo egoismo. Ottieni +" + BONUS_KARMA + " Karma.";
         }
+        return dialogo + "\n\n[FALLIMENTO - Lancio: " + tiro + "]\nL'esitazione cinica ti blocca. La figura svanisce lasciandoti solo con le tue colpe.";
     }
 
     @Override
-    public boolean isCompletata() {
-        return this.completata;
-    }
+    public boolean isCompletata() { return completata; }
 }

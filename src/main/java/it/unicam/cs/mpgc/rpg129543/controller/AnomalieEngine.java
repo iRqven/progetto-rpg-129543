@@ -6,80 +6,68 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Gestisce la logica stocastica e decisionale degli imprevisti interattivi.
- * Isola gli effetti collaterali e i patti dal ciclo standard di combattimento.
+ * Gestisce la logica stocastica e casuale degli imprevisti interattivi nel Purgatorio.
  */
 public class AnomalieEngine {
-    private static final int SOGLIA_PROBABILITA = 4; // 25% di probabilità
-    private static final int PENALITA_VITA_PATTO = 20;
-    private static final int BONUS_VOLONTA_PATTO = 4;
-    private static final int DANNO_AZZARDO = 50;
-    private static final int CONTRACCOLPO_AZZARDO = 20;
-    private static final int MASSIMO_HP = 100;
+    private static final int RANGE_CASUALE = 4; // 1 possibilita su 4 -> 25% reale di innesco ad ogni turno
+    private static final int TRIGGER_EVENTO = 0;
+
+    private static final int PATTO_HP_COST = 20;
+    private static final int PATTO_WILL_BONUS = 4;
+    private static final int AZZARDO_DAMAGE = 50;
+    private static final int AZZARDO_BACKLASH = 20;
 
     private final Random rand = new Random();
     private boolean imprevistoAttivo = false;
-    private int tipoEventoCorrente = 0;
+    private int eventoId = 0;
 
     /**
-     * Determina se un'anomalia interattiva si manifesta nel turno corrente.
-     *
-     * @return true se il bivio si è attivato, false altrimenti.
+     * Calcola stocasticamente ad ogni turno se l'imprevisto deve manifestarsi o meno.
      */
     public boolean controllaInnesco() {
-        this.imprevistoAttivo = (rand.nextInt(SOGLIA_PROBABILITA) == 0);
+        // Genera un numero da 0 a 3. L'anomalia si attiva SOLO se esce esattamente 0
+        this.imprevistoAttivo = (rand.nextInt(RANGE_CASUALE) == TRIGGER_EVENTO);
         if (imprevistoAttivo) {
-            this.tipoEventoCorrente = rand.nextInt(3);
+            this.eventoId = rand.nextInt(3); // Pesca un imprevisto casuale tra i 3 disponibili
         }
         return imprevistoAttivo;
     }
 
-    /**
-     * Restituisce la formulazione testuale del bivio per il log dell'interfaccia.
-     */
     public String getTestoBivio() {
-        if (!imprevistoAttivo) {
-            return "";
-        }
-        return switch (tipoEventoCorrente) {
-            case 0 -> "🔴 DIALOGO CON L'IGNOTO: \"Sacrifica la tua stabilità terrea per ottenere l'energia per combattere...\"\n" +
-                    "[ACCETTA: Perdi " + PENALITA_VITA_PATTO + " HP per ottenere +" + BONUS_VOLONTA_PATTO + " Volontà] | [RIFIUTA: Mantieni intatta l'Anima]";
-            case 1 -> "🟡 AZZARDO PURGATORIALE: Un'eco instabile del passato sfida la tua sorte.\n" +
-                    "[ACCETTA: 50% di infliggere " + DANNO_AZZARDO + " danni, 50% di subire " + CONTRACCOLPO_AZZARDO + " danni] | [RIFIUTA: Non rischiare]";
-            default -> "🔵 REVERSIONE ETALICA: La nebbia si stringe per un baratto estremo.\n" +
-                    "[ACCETTA: Consuma TUTTA la Volontà attuale per rigenerarti a " + MASSIMO_HP + " HP] | [RIFIUTA: Conserva le risorse]";
+        if (!imprevistoAttivo) return "";
+        return switch (eventoId) {
+            case 0 -> "[PATTO CON L'IGNOTO] Sacrifica la tua stabilita terrena per accumulare energia spirituale.\n" +
+                    "[ACCETTA: Perdi " + PATTO_HP_COST + " HP per ottenere +" + PATTO_WILL_BONUS + " Volonta] | [RIFIUTA: Consolida l'Anima]";
+            case 1 -> "[AZZARDO DEL PASSATO] Un'eco instabile sfida la tua sorte.\n" +
+                    "[ACCETTA: 50% di infliggere " + AZZARDO_DAMAGE + " danni, 50% di subire " + AZZARDO_BACKLASH + " contraccolpo] | [RIFIUTA: Evita il rischio]";
+            default -> "[REVERSIONE SPIRITUALE] La nebbia stringe un baratto estremo.\n" +
+                    "[ACCETTA: Consuma tutta la Volonta per rigenerare la salute al valore massimo] | [RIFIUTA: Conserva le risorse]";
         };
     }
 
-    /**
-     * Applica gli effetti collaterali positivi o negativi della Scelta A.
-     */
     public String applicaSceltaA(Player p, Enemy e, BattleEngine engine) {
-        Objects.requireNonNull(p, "Impossibile applicare anomalie su un Player nullo.");
-        Objects.requireNonNull(e, "Impossibile applicare anomalie su un Enemy nullo.");
-        Objects.requireNonNull(engine, "Impossibile modificare un BattleEngine nullo.");
+        Objects.requireNonNull(p); Objects.requireNonNull(e); Objects.requireNonNull(engine);
+        this.imprevistoAttivo = false; // Disattiva l'anomalia subito dopo l'esecuzione della scelta
 
-        this.imprevistoAttivo = false;
-
-        return switch (tipoEventoCorrente) {
+        return switch (eventoId) {
             case 0 -> {
-                p.takeDamage(PENALITA_VITA_PATTO);
-                engine.setVolonta(Math.min(8, engine.getVolonta() + BONUS_VOLONTA_PATTO));
-                yield "Patto siglato. Perdi " + PENALITA_VITA_PATTO + " HP ma la tua Volontà si espande.";
+                p.takeDamage(PATTO_HP_COST);
+                engine.setVolonta(Math.min(8, engine.getVolonta() + PATTO_WILL_BONUS));
+                yield "Patto siglato. Sacrificati " + PATTO_HP_COST + " HP per estendere la riserva di Volonta.";
             }
             case 1 -> {
                 if (rand.nextBoolean()) {
-                    e.takeDamage(DANNO_AZZARDO);
-                    yield "Sorte favorevole! Lo squarcio infligge " + DANNO_AZZARDO + " danni al Rimorso.";
+                    e.takeDamage(AZZARDO_DAMAGE);
+                    yield "Sorte favorevole! Lo squarcio della nebbia infligge " + AZZARDO_DAMAGE + " danni alla tua vittima.";
                 } else {
-                    p.takeDamage(CONTRACCOLPO_AZZARDO);
-                    yield "La fortuna ti volge le spalle! Subisci " + CONTRACCOLPO_AZZARDO + " danni da contraccolpo.";
+                    p.takeDamage(AZZARDO_BACKLASH);
+                    yield "Contraccolpo violento dei binari! Subisci " + AZZARDO_BACKLASH + " danni spirituali sulla coscienza.";
                 }
             }
             default -> {
-                p.setHp(MASSIMO_HP);
+                p.setHp(p.getHpMax());
                 engine.setVolonta(0);
-                yield "Forma spirituale ripristinata a " + MASSIMO_HP + " HP. La tua Volontà è azzerata.";
+                yield "Salute ripristinata al massimo valore dell'Anima. Tutta la tua Volonta e evaporata.";
             }
         };
     }

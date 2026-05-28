@@ -1,15 +1,15 @@
 {
   "nome" : "Anima",
-  "hp" : 100,
+  "hp" : 84,
   "hpMax" : 100,
   "karma" : 0,
   "livello" : 1,
   "xp" : 0,
   "xpNecessari" : 100,
-  "x" : 100.0,
+  "x" : 50.0,
   "y" : 300.0,
   "determinazione" : 10,
   "resilienza" : 10,
   "sintonia" : 10,
-  "ricordi" : [ ]
+  "ricordi" : [ "Un fischietto d'ottone arrugginito." ]
 }

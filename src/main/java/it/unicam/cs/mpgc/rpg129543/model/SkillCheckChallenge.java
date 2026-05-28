@@ -8,7 +8,7 @@ import java.util.Random;
  * Rappresenta la sfida di interazione morale con l'Ombra di una Vecchia Signora.
  * Gestisce la logica di superamento della prova basandosi sulle statistiche del giocatore.
  */
-public class OldLadyChallenge implements Challenge {
+public class SkillCheckChallenge implements Challenge {
     // Sostituzione dei Magic Numbers con costanti esplicite per il Clean Code
     private static final int SOGLIA_DIFFICOLTA = 12;
     private static final int PREMIO_KARMA = 15;
@@ -20,7 +20,7 @@ public class OldLadyChallenge implements Challenge {
     /**
      * Costruttore della sfida. Inizializza lo stato e il generatore di numeri casuali.
      */
-    public OldLadyChallenge() {
+    public SkillCheckChallenge() {
         this.random = new Random();
         this.completata = false;
     }

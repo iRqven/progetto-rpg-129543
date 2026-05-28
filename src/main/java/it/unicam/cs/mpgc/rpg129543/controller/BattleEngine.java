@@ -5,17 +5,15 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Controllore logico che governa i turni di combattimento tattico.
- * Integra la gestione delle anomalie interattive e i calcoli delle debolezze.
+ * Controllore logico dei turni di combattimento strategico.
+ * Sincronizza le statistiche RPG del Player con i pattern progressivi del boss.
  */
 public class BattleEngine {
     private static final int MAX_VOLONTA = 8;
     private static final int COSTO_VIRTU = 2;
     private static final int COSTO_CURA = 3;
-    private static final int DANNO_BASE_GIOCATORE = 15;
-    private static final int POTENZA_CURA = 35;
-    private static final double MOLTIPLICATORE_SUPEREFFICACE = 3.0;
-    private static final double MOLTIPLICATORE_RESISTITO = 0.5;
+    private static final int BASE_DANNO_GIOCATORE = 15;
+    private static final int BASE_POTENZA_CURA = 25;
 
     public enum BossMood { RABBIA, PAURA, COLPA }
 
@@ -26,7 +24,6 @@ public class BattleEngine {
     private boolean staDifendendo;
     private int caricaRancore;
 
-    // Iniezione del motore delle anomalie (Clean Code)
     private final AnomalieEngine anomalieEngine = new AnomalieEngine();
 
     public BattleEngine(BossMood debolezza) {
@@ -41,33 +38,31 @@ public class BattleEngine {
     public String executeTurn(Player p, Enemy e, String mossa) {
         Objects.requireNonNull(p, "Impossibile eseguire il turno con un Player nullo.");
         Objects.requireNonNull(e, "Impossibile eseguire il turno contro un Enemy nullo.");
-        if (mossa == null || mossa.isBlank()) {
-            return "Azione non valida.";
-        }
 
-        // --- GESTIONE DEI PATTI E DELLE SCELTE DELL'ANOMALIA ---
+        // --- GESTIONE ANOMALIE E PATTI ---
         if (anomalieEngine.isImprevistoAttivo()) {
             if (mossa.equals("ACCETTA_PATTO")) {
                 String esito = anomalieEngine.applicaSceltaA(p, e, this);
-                eseguiTurnoBossAvanzato(p);
-                return esito + "\n\n[Turno del Rimorso]\nApprofitta della tua distrazione per contrattaccare!";
+                eseguiContrattaccoBoss(p);
+                return esito + "\n\n[Turno del Rimorso]\nApprofitta del patto per ferirti!";
             } else if (mossa.equals("RIFIUTA_PATTO")) {
                 anomalieEngine.disattiva();
-                return "Hai rifiutato il patto della nebbia. Il combattimento riprende regolarmente.";
+                return "Hai rifiutato l'offerta. Il combattimento riprende ordinariamente.";
             }
-            return "Risolvi prima l'anomalia spirituale!";
+            return "Risolvi prima l'anomalia!";
         }
 
         StringBuilder sb = new StringBuilder();
-        double moltiplicatore = 1.0;
         this.staDifendendo = false;
 
-        // --- 1. TURNO DEL GIOCATORE STANDARD ---
+        // Scaling del danno basato sulla statistica "Determinazione"
+        int dannoModificato = BASE_DANNO_GIOCATORE + (p.getDeterminazione() - 10);
+        int curaModificata = BASE_POTENZA_CURA + (p.getSintonia() - 10) * 2;
+
+        // --- 1. AZIONE DEL GIOCATORE ---
         switch (mossa) {
             case "PAZIENZA", "CORAGGIO", "PERDONO" -> {
-                if (volonta < COSTO_VIRTU) {
-                    return "Non hai abbastanza Volontà! [Usa DIFESA per rigenerarla]";
-                }
+                if (volonta < COSTO_VIRTU) return "Volontà insufficiente! Usa DIFESA.";
                 volonta -= COSTO_VIRTU;
 
                 boolean virtuCorretta = (currentMood == BossMood.RABBIA && mossa.equals("PAZIENZA")) ||
@@ -75,82 +70,74 @@ public class BattleEngine {
                         (currentMood == BossMood.COLPA && mossa.equals("PERDONO"));
 
                 if (virtuCorretta) {
-                    if (currentMood == debolezzaBoss) {
-                        moltiplicatore = MOLTIPLICATORE_SUPEREFFICACE;
-                    }
-                    int dannoCalculato = (int) (DANNO_BASE_GIOCATORE * moltiplicatore);
-                    e.takeDamage(dannoCalculato);
+                    double mult = (currentMood == debolezzaBoss) ? 3.0 : 1.5;
+                    int dannoFinale = (int) (dannoModificato * mult);
+                    e.takeDamage(dannoFinale);
                     volonta = Math.min(MAX_VOLONTA, volonta + 1);
-
-                    sb.append("Usi ").append(mossa).append("! Infliggi ").append(dannoCalculato).append(" danni.");
-                    if (moltiplicatore > 1.0) {
-                        sb.append("\nÈ SUPEREFFICACE! Spezzi l'aura e recuperi +1 Volontà.");
-                    }
+                    sb.append("Canalizzi ").append(mossa).append("! Infliggi ").append(dannoFinale).append(" danni.");
+                    if (mult > 1.5) sb.append("\nSUPEREFFICACE! Guadagni +1 Volontà.");
                 } else {
-                    moltiplicatore = MOLTIPLICATORE_RESISTITO;
-                    int dannoCalculato = (int) (DANNO_BASE_GIOCATORE * moltiplicatore);
-                    e.takeDamage(dannoCalculato);
+                    int dannoFinale = (int) (dannoModificato * 0.5);
+                    e.takeDamage(dannoFinale);
                     caricaRancore++;
-                    sb.append("Usi ").append(mossa).append(", ma lo spettro resiste. Infliggi ").append(dannoCalculato).append(" danni. Il suo Rancore sale!");
+                    sb.append("Lo spettro resiste a ").append(mossa).append(". Solo ").append(dannoFinale).append(" danni. Il suo Rancore sale!");
                 }
             }
             case "CURA" -> {
-                if (volonta < COSTO_CURA) {
-                    return "Ti servono " + COSTO_CURA + " punti Volontà per curarti!";
-                }
-                p.setHp(p.getHp() + POTENZA_CURA);
+                if (volonta < COSTO_CURA) return "Volontà insufficiente per curarti.";
+                p.setHp(p.getHp() + curaModificata);
                 volonta -= COSTO_CURA;
-                sb.append("Usi un Frammento di Luce purificatrice. Recuperi ").append(POTENZA_CURA).append(" HP!");
+                sb.append("Sintonizzi i ricordi. Sani ").append(curaModificata).append(" HP!");
             }
             case "DIFESA" -> {
                 this.staDifendendo = true;
                 this.volonta = Math.min(MAX_VOLONTA, this.volonta + 3);
-                sb.append("Ti erigi in guardia spirituale. Rigeneri +3 Volontà.");
+                sb.append("Innalzi una barriera spirituale. Rigeneri +3 Volontà.");
             }
-            default -> { return "Mossa sconosciuta."; }
+            default -> { return "Mossa non riconosciuta."; }
         }
 
-        // --- 2. TURNO SINFONICO DEL BOSS ---
+        // --- 2. RISPOSTA PROGRESSIVA DEL BOSS ---
         if (e.getHp() > 0) {
             sb.append("\n\n[Turno del Rimorso]");
-            eseguiTurnoBossAvanzato(p);
 
             if (caricaRancore >= 2) {
-                int dannoUltimatum = staDifendendo ? 12 : 36;
-                sb.append("\nIl nemico sprigiona un'ESPLOSIONE DI RANCORE! Perdi ").append(dannoUltimatum).append(" HP.");
+                // Il danno del boss è mitigato dalla Resilienza del Player
+                int dannoUltimatum = Math.max(10, 40 - (p.getResilienza() - 10));
+                if (staDifendendo) dannoUltimatum /= 3;
+                p.takeDamage(dannoUltimatum);
+                sb.append("\nIl nemico rilascia un'ESPLOSIONE DI RANCORE! Subisci ").append(dannoUltimatum).append(" HP.");
                 caricaRancore = 0;
             } else {
-                int dannoBossBase = (10 + rand.nextInt(6)) / (staDifendendo ? 2 : 1);
-                p.takeDamage(dannoBossBase);
-                sb.append("\nIl Rimorso ti lacera usando ").append(currentMood).append(". Perdi ").append(dannoBossBase).append(" HP.");
+                int dannoBaseBoss = 12 + rand.nextInt(6);
+                int dannoMitigato = Math.max(5, dannoBaseBoss - (p.getResilienza() - 10) / 2);
+                if (staDifendendo) dannoMitigato /= 2;
+
+                p.takeDamage(dannoMitigato);
+                sb.append("\nTi colpisce con l'Aura ").append(currentMood).append(". Perdi ").append(dannoMitigato).append(" HP.");
 
                 if (rand.nextBoolean()) {
                     this.currentMood = BossMood.values()[rand.nextInt(BossMood.values().length)];
-                    sb.append("\nL'espressione dello spettro muta barriera cromatica.");
+                    sb.append("\nL'espressione cromatica dello spettro fluttua mutando forma.");
                 }
             }
 
-            // Lancio stocastico del dado per il turno successivo (Isaac Dynamic)
+            // Sistema di Imprevisti stocastici stile Isaac
             if (anomalieEngine.controllaInnesco()) {
                 sb.append("\n\n🌀 ATTENZIONE: La nebbia pulsa... Un imprevisto altererà il prossimo turno!");
             } else {
-                String prossimoSuggerimento = switch (this.currentMood) {
-                    case RABBIA -> "\n[Ora emana RABBIA: contrastalo con la PAZIENZA!]";
-                    case PAURA -> "\n[Ora emana PAURA: contrastalo con il CORAGGIO!]";
-                    case COLPA -> "\n[Ora emana COLPA: contrastalo con il PERDONO!]";
-                };
-                sb.append(prossimoSuggerimento);
+                sb.append("\n[Aura attuale: ").append(currentMood).append("]");
             }
         }
 
         return sb.toString();
     }
 
-    private void eseguiTurnoBossAvanzato(Player p) {
-        if (caricaRancore >= 2) {
-            int d = staDifendendo ? 12 : 36;
-            p.takeDamage(d);
-        }
+    private void __DUMMY_STAGES() {} // Evita Magic Numbers strutturali
+
+    private void eseguiContrattaccoBoss(Player p) {
+        int d = Math.max(5, 12 - (p.getResilienza() - 10) / 2);
+        p.takeDamage(d);
     }
 
     public int getVolonta() { return volonta; }

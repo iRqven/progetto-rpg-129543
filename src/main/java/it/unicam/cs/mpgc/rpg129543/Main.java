@@ -21,8 +21,7 @@ import java.util.Set;
 
 /**
  * Classe di ingresso principale dell'applicazione.
- * Coordina il ciclo di rendering visivo e intercetta l'input dell'utente
- * delegando le operazioni logiche ai rispettivi Controller e Modelli.
+ * Coordina il ciclo di rendering visivo e gestisce la UI ad albero e a comparsa.
  */
 public class Main extends Application {
     private Player player;
@@ -37,13 +36,16 @@ public class Main extends Application {
 
     private BattleEngine currentBattle;
     private Enemy currentEnemy;
+    private boolean isInSubMenuVirtu = false;
 
     private Pane gameArea;
     private Group playerGroup;
     private Group playerSpriteShape;
     private Rectangle hpBar;
     private VBox interactionOverlay;
-    private Label karmaLabel, levelLabel;
+
+    // Riferimenti HUD per aggiornamenti puliti ed allineati
+    private Label labelKarma, labelLivello, labelPiano;
 
     @Override
     public void start(Stage primaryStage) {
@@ -180,35 +182,26 @@ public class Main extends Application {
 
     private void showBattleTutorial(Challenge challenge) {
         interactionOverlay.getChildren().clear();
-        Label t = new Label("TUTORIAL DI COMBATTIMENTO");
+        Label t = new Label("SCONTRO DIRETTO SULL'ANIMA");
         t.setStyle("-fx-text-fill: cyan; -fx-font-weight: bold; -fx-font-size: 18px;");
 
-        Label desc = new Label("Ogni Rimorso ha un'Aura colorata.\n\n" +
-                "🔵 PAZIENZA batte Aura RABBIA\n" +
-                "🔴 CORAGGIO batte Aura PAURA\n" +
-                "🟡 PERDONO batte Aura COLPA\n\n" +
-                "DIFESA riduce i danni e rigenera molta Volontà.\n" +
-                "CURA ripristina la tua salute terrena.\n" +
-                "Attenzione agli Imprevisti casuali della Nebbia!");
+        Label desc = new Label("Il livello della stanza influisce sul potere dello Spettro.\n" +
+                "Puoi navigare nel menu tattico aprendo il ramo 'VIRTÙ'.\n" +
+                "Sconfiggere boss elargisce XP vitali per aumentare gli attributi.");
         desc.setStyle("-fx-text-fill: white; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
         desc.setWrapText(true);
 
-        Button startBtn = new Button("Inizia lo scontro");
+        Button startBtn = new Button("Inizia il Combattimento");
         startBtn.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
         startBtn.setOnAction(e -> {
             BattleEngine.BossMood debolezza = BattleEngine.BossMood.values()[(int)(Math.random() * 3)];
             currentBattle = new BattleEngine(debolezza);
+            isInSubMenuVirtu = false;
 
             String nomeBoss = (challenge instanceof CombatChallenge) ? ((CombatChallenge) challenge).getDescrizioneDettagliata() : "Rimorso Inquieto";
             currentEnemy = new Enemy(nomeBoss, 100, debolezza.name());
 
-            String spiegazioneIniziale = switch (currentBattle.getCurrentMood()) {
-                case RABBIA -> "Lo scontro ha inizio! Lo spettro emana RABBIA. Canalizza la PAZIENZA per colpirlo al cuore.";
-                case PAURA -> "Lo scontro ha inizio! Lo spettro emana PAURA. Canalizza il CORAGGIO per resistergli.";
-                case COLPA -> "Lo scontro ha inizio! Lo spettro emana COLPA. Canalizza il PERDONO per dissiparlo.";
-            };
-
-            updateBattleUI(spiegazioneIniziale);
+            updateBattleUI("La nebbia si focalizza. Lo spettro ringhia ferocemente.");
         });
 
         interactionOverlay.getChildren().addAll(t, desc, startBtn);
@@ -216,78 +209,128 @@ public class Main extends Application {
 
     private void updateBattleUI(String logText) {
         interactionOverlay.getChildren().clear();
-        interactionOverlay.setSpacing(15);
+        interactionOverlay.setSpacing(12);
         interactionOverlay.setStyle("-fx-background-color: rgba(10, 10, 10, 0.98); -fx-border-color: #7f8c8d; -fx-padding: 20; -fx-border-width: 3;");
 
-        Label auraLabel = new Label(" AURA NEMICA: " + currentBattle.getCurrentMood() + " ");
+        Label auraLabel = new Label(" STATO EMOTIVO BOSS: " + currentBattle.getCurrentMood() + " ");
         auraLabel.setStyle("-fx-background-color: " + getMoodColor(currentBattle.getCurrentMood()) + "; -fx-text-fill: black; -fx-font-weight: bold;");
 
-        Label stats = new Label("HP: " + player.getHp() + "/100  |  VOLONTÀ: " + currentBattle.getVolonta() + "/8");
-        stats.setStyle("-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 14px;");
+        Label stats = new Label("HP: " + player.getHp() + "/" + player.getHpMax() + " | VOLONTÀ: " + currentBattle.getVolonta() + "/8 | ATK: " + player.getDeterminazione());
+        stats.setStyle("-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 13px;");
 
         Label log = new Label(logText);
         log.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
-        log.setWrapText(true); log.setMinHeight(75);
+        log.setWrapText(true); log.setMinHeight(70);
 
         GridPane menuLotta = new GridPane();
         menuLotta.setHgap(10); menuLotta.setVgap(10); menuLotta.setAlignment(Pos.CENTER);
 
-        // REATTIVITÀ DELLA VIEW: Cambiamo i bottoni a schermo se un'anomalia interattiva è attiva
+        String styleBtn = "-fx-min-width: 135; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
+
         if (currentBattle.getAnomalieEngine().isImprevistoAttivo()) {
             log.setText(currentBattle.getAnomalieEngine().getTestoBivio());
+            log.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
 
-            Button btnAccetta = new Button("ACCETTA PATTO (Opzione A)");
-            Button btnRifiuta = new Button("RIFIUTA PATTO (Opzione B)");
-
-            String styleBivio = "-fx-min-width: 180; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
-            btnAccetta.setStyle(styleBivio + "-fx-base: #c0392b; -fx-text-fill: white;");
-            btnRifiuta.setStyle(styleBivio + "-fx-base: #7f8c8d; -fx-text-fill: white;");
+            Button btnAccetta = new Button("ACCETTA PATTO");
+            Button btnRifiuta = new Button("RIFIUTA PATTO");
+            btnAccetta.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
+            btnRifiuta.setStyle(styleBtn + "-fx-base: #7f8c8d; -fx-text-fill: white;");
 
             btnAccetta.setOnAction(e -> processBattle("ACCETTA_PATTO"));
             btnRifiuta.setOnAction(e -> processBattle("RIFIUTA_PATTO"));
 
-            menuLotta.add(btnAccetta, 0, 0);
-            menuLotta.add(btnRifiuta, 1, 0);
-        } else {
+            menuLotta.add(btnAccetta, 0, 0); menuLotta.add(btnRifiuta, 1, 0);
+        } else if (isInSubMenuVirtu) {
             Button btnPaz = new Button("PAZIENZA (-2V)");
             Button btnCor = new Button("CORAGGIO (-2V)");
             Button btnPer = new Button("PERDONO (-2V)");
-            Button btnDef = new Button("DIFESA (+3V)");
-            Button btnCur = new Button("CURA (-3V)");
-            Button btnFug = new Button("FUGA");
+            Button btnIndietro = new Button("INDIETRO");
 
-            String styleBtn = "-fx-min-width: 130; -fx-min-height: 40; -fx-font-family: 'Courier New'; -fx-font-weight: bold;";
             btnPaz.setStyle(styleBtn + "-fx-base: #2980b9; -fx-text-fill: white;");
             btnCor.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
             btnPer.setStyle(styleBtn + "-fx-base: #f39c12; -fx-text-fill: white;");
-            btnDef.setStyle(styleBtn + "-fx-base: #27ae60;");
-            btnCur.setStyle(styleBtn + "-fx-base: #8e44ad;");
-            btnFug.setStyle(styleBtn + "-fx-base: #7f8c8d;");
+            btnIndietro.setStyle(styleBtn + "-fx-base: #7f8c8d;");
 
             btnPaz.setOnAction(e -> processBattle("PAZIENZA"));
             btnCor.setOnAction(e -> processBattle("CORAGGIO"));
             btnPer.setOnAction(e -> processBattle("PERDONO"));
+            btnIndietro.setOnAction(e -> { isInSubMenuVirtu = false; updateBattleUI(logText); });
+
+            menuLotta.add(btnPaz, 0, 0); menuLotta.add(btnCor, 1, 0);
+            menuLotta.add(btnPer, 0, 1); menuLotta.add(btnIndietro, 1, 1);
+        } else {
+            Button btnApriVirtu = new Button("VIRTÙ...");
+            Button btnDef = new Button("DIFESA (+3V)");
+            Button btnCur = new Button("CURA (-3V)");
+            Button btnFug = new Button("FUGA");
+
+            btnApriVirtu.setStyle(styleBtn + "-fx-base: #d35400; -fx-text-fill: white;");
+            btnDef.setStyle(styleBtn + "-fx-base: #27ae60;");
+            btnCur.setStyle(styleBtn + "-fx-base: #8e44ad;");
+            btnFug.setStyle(styleBtn + "-fx-base: #7f8c8d;");
+
+            btnApriVirtu.setOnAction(e -> { isInSubMenuVirtu = true; updateBattleUI(log.getText()); });
             btnDef.setOnAction(e -> processBattle("DIFESA"));
             btnCur.setOnAction(e -> processBattle("CURA"));
             btnFug.setOnAction(e -> {
                 gameState.getCurrentRoom().setSfidaGestita(true);
-                finishInteraction("Sei fuggito sacrificando la tua determinazione.");
+                finishInteraction("Sei fuggito perdendo terreno.");
             });
 
-            menuLotta.add(btnPaz, 0, 0); menuLotta.add(btnCor, 1, 0); menuLotta.add(btnPer, 2, 0);
-            menuLotta.add(btnDef, 0, 1); menuLotta.add(btnCur, 1, 1); menuLotta.add(btnFug, 2, 1);
+            menuLotta.add(btnApriVirtu, 0, 0); menuLotta.add(btnDef, 1, 0);
+            menuLotta.add(btnCur, 0, 1); menuLotta.add(btnFug, 1, 1);
         }
 
         interactionOverlay.getChildren().addAll(auraLabel, stats, log, menuLotta);
 
         if (currentEnemy.getHp() <= 0) {
-            player.addKarma(30); player.setHp(Math.min(100, player.getHp() + 25));
+            int premioXp = (gameState.getCurrentRoom().id() + 1) * 50;
+            player.addKarma(30);
+
+            // Intercettiamo il segnale booleano di livellamento per attivare l'overlay a comparsa
+            boolean haLivellato = player.addXp(premioXp);
             gameState.getCurrentRoom().solveChallenge();
-            finishInteraction("VITTORIA! Il Rimorso è purificato. Recuperi energie vitali.");
+
+            if (haLivellato) {
+                showLevelUpNotification(premioXp);
+            } else {
+                finishInteraction("PURIFICATO! Sconfiggi lo spettro ed accumuli +" + premioXp + " XP.");
+            }
         } else if (player.getHp() <= 0) {
             finishInteraction("L'OSCURITÀ TI HA CONSUMATO...");
             resetGame();
         }
+    }
+
+    /**
+     * Mostra la notifica centrale a comparsa di Trascendenza dell'Anima (Baldur's Style)
+     */
+    private void showLevelUpNotification(int xpGuadagnati) {
+        interactionOverlay.getChildren().clear();
+        interactionOverlay.setSpacing(20);
+        interactionOverlay.setStyle("-fx-background-color: rgba(20, 20, 30, 0.98); -fx-border-color: #f1c40f; -fx-padding: 30; -fx-border-width: 3; -fx-border-radius: 10;");
+
+        Label titolo = new Label("CONSEGUIMENTO DELLA CONSAPEVOLEZZA");
+        titolo.setStyle("-fx-text-fill: #f1c40f; -fx-font-size: 18px; -fx-font-weight: bold; -fx-font-family: 'Courier New';");
+
+        Label desc = new Label("Hai accumulato +" + xpGuadagnati + " XP. La tua Anima ascende al LIVELLO " + player.getLivello() + "!\n\n" +
+                "Le tue proprietà spirituali si sono espanse permanentemente:\n" +
+                "Determinazione (ATK): " + player.getDeterminazione() + " (+2)\n" +
+                "Resilienza (DEF): " + player.getResilienza() + " (+2)\n" +
+                "Sintonia (HP Max): " + player.getHpMax() + " (" + player.getHp() + " HP Correnti)");
+        desc.setStyle("-fx-text-fill: white; -fx-text-alignment: center; -fx-font-family: 'Georgia'; -fx-font-size: 14px;");
+        desc.setWrapText(true);
+
+        Button btnChiudi = new Button("Prendi Consapevolezza");
+        btnChiudi.setStyle("-fx-min-width: 180; -fx-min-height: 40; -fx-base: #f1c40f; -fx-text-fill: black; -fx-font-weight: bold;");
+        btnChiudi.setOnAction(e -> {
+            gameArea.getChildren().remove(interactionOverlay);
+            player.setX(player.getX() - 60);
+            isInteracting = false;
+            refreshRoomGraphics();
+        });
+
+        interactionOverlay.getChildren().addAll(titolo, desc, btnChiudi);
     }
 
     private void togglePauseMenu() {
@@ -349,12 +392,29 @@ public class Main extends Application {
         playerGroup = new Group(playerSpriteShape, hpBg, hpBar);
     }
 
-    private HBox createTopHud() {
-        karmaLabel = new Label(); levelLabel = new Label();
-        String style = "-fx-text-fill: white; -fx-font-weight: bold;";
-        karmaLabel.setStyle(style); levelLabel.setStyle(style);
-        HBox hud = new HBox(50, karmaLabel, levelLabel); hud.setAlignment(Pos.CENTER);
-        hud.setPrefHeight(50); hud.setStyle("-fx-background-color: #2c3e50;");
+    /**
+     * Configura l'HUD di esplorazione superiore tramite una griglia bilanciata e priva di emoji.
+     */
+    private GridPane createTopHud() {
+        GridPane hud = new GridPane();
+        hud.setAlignment(Pos.CENTER);
+        hud.setHgap(60);
+        hud.setPrefHeight(50);
+        hud.setStyle("-fx-background-color: #1a1a24; -fx-border-color: #2c3e50; -fx-border-width: 0 0 2 0;");
+
+        labelKarma = new Label();
+        labelLivello = new Label();
+        labelPiano = new Label();
+
+        String styleText = "-fx-text-fill: #bdc3c7; -fx-font-weight: bold; -fx-font-family: 'Courier New'; -fx-font-size: 13px;";
+        labelKarma.setStyle(styleText);
+        labelLivello.setStyle(styleText);
+        labelPiano.setStyle(styleText);
+
+        hud.add(labelKarma, 0, 0);
+        hud.add(labelLivello, 1, 0);
+        hud.add(labelPiano, 2, 0);
+
         return hud;
     }
 
@@ -417,9 +477,13 @@ public class Main extends Application {
         updateStatusBar();
     }
 
-    private void render() { playerGroup.setTranslateX(player.getX()); playerGroup.setTranslateY(player.getY()); hpBar.setWidth(HP_BAR_WIDTH * (player.getHp() / 100.0)); }
+    private void render() { playerGroup.setTranslateX(player.getX()); playerGroup.setTranslateY(player.getY()); hpBar.setWidth(HP_BAR_WIDTH * (player.getHp() / (double)player.getHpMax())); }
 
-    private void updateStatusBar() { karmaLabel.setText("⚖️ Karma: " + player.getKarma()); levelLabel.setText("🚪 Piano: " + (gameState.getCurrentRoom().id() + 1)); }
+    private void updateStatusBar() {
+        labelKarma.setText("KARMA: " + player.getKarma());
+        labelLivello.setText("LIVELLO ANIMA: " + player.getLivello() + " (" + player.getXp() + "/" + player.getXpNecessari() + " XP)");
+        labelPiano.setText("PIANO CORRENTE: " + (gameState.getCurrentRoom().id() + 1));
+    }
 
     private void updateBackground() {
         int liv = gameState.getCurrentRoom().id();

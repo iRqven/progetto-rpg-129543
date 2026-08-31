@@ -2,7 +2,7 @@
   "nome" : "Anima",
   "hp" : 100,
   "hpMax" : 100,
-  "karma" : 0,
+  "karma" : -45,
   "livello" : 1,
   "xp" : 0,
   "xpNecessari" : 100,
@@ -11,6 +11,6 @@
   "determinazione" : 10,
   "resilienza" : 10,
   "sintonia" : 10,
-  "ricordi" : [ ],
+  "ricordi" : [ "L'invidia per il talento altrui mascherata da affari freddi. Un rancore coltivato all'ombra dei successi altrui." ],
   "genereSprite" : "female"
 }

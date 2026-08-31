@@ -17,11 +17,11 @@ public class Room {
     private boolean sfidaGestita = false;
     private boolean karmaGiaTolto = false;
 
-    // Coordinate NPC/Boss
+    // Coordinate NPC/Boss (fisse per stanza)
     private final double npcX;
     private final double npcY;
 
-    // Coordinate Porta
+    // Coordinate Porta (fisse per stanza)
     private final double doorX;
     private final double doorY;
 
@@ -35,7 +35,7 @@ public class Room {
                 double npcX, double npcY, double doorX, double doorY,
                 String ricordoSbloccato, double fragX, double fragY, boolean hasFragment) {
 
-        // Clausole di guardia per la programmazione difensiva (Punto 4)
+        // Clausole di guardia per la programmazione difensiva
         if (id < 0) {
             throw new IllegalArgumentException("L'ID della stanza non può essere negativo.");
         }
@@ -50,13 +50,17 @@ public class Room {
         this.nome = nome;
         this.descrizione = descrizione;
         this.sfida = sfida;
-        this.npcX = npcX;
-        this.npcY = npcY;
+
+        // Assegniamo coordinate fisse calcolate in base all'id (così variano da stanza a stanza ma restano fisse nella stessa stanza)
+        this.npcX = 520 + (id * 15) % 80;
+        this.npcY = 250 + (id * 25) % 100;
+
         this.doorX = doorX;
         this.doorY = doorY;
+
         this.ricordoSbloccato = ricordoSbloccato;
-        this.fragX = fragX;
-        this.fragY = fragY;
+        this.fragX = 300 + (id * 35) % 150;
+        this.fragY = 400 + (id * 20) % 80;
         this.hasFragment = hasFragment;
 
         // Se non c'è una sfida, la stanza è considerata già "gestita" (es. Atrio)
@@ -74,11 +78,7 @@ public class Room {
     public Challenge sfida() { return sfida; }
     public boolean hasChallenge() { return sfida != null; }
 
-    /** * Gestisce il completamento della sfida (chiamato dopo una vittoria).
-     * Sfrutta l'architettura polimorfica per aggiornare lo stato interno del boss.
-     */
     public void solveChallenge() {
-        // Blocco di sicurezza per evitare ri-esecuzioni
         if (this.sfidaGestita) return;
 
         if (sfida instanceof CombatChallenge) {
@@ -93,15 +93,13 @@ public class Room {
     public boolean isKarmaGiaTolto() { return karmaGiaTolto; }
     public void setKarmaGiaTolto(boolean stato) { this.karmaGiaTolto = stato; }
 
-    // Coordinate Boss
+    // Restituiscono i valori fissi calcolati nel costruttore
     public double npcX() { return npcX; }
     public double npcY() { return npcY; }
 
-    // Coordinate Porta
     public double doorX() { return doorX; }
     public double doorY() { return doorY; }
 
-    // Logica Frammenti
     public boolean hasFragment() { return hasFragment; }
     public double fragX() { return fragX; }
     public double fragY() { return fragY; }

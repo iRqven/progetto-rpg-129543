@@ -31,4 +31,10 @@ public class NarrativeChallenge implements Challenge {
     public boolean isCompletata() {
         return this.completata;
     }
+
+    @Override
+    public boolean isCombat() {
+        return false;
+    }
+    @Override public boolean isSkillCheck() { return false; }
 }

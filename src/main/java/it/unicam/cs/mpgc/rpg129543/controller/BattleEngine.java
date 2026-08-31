@@ -122,5 +122,6 @@ public class BattleEngine {
     public int getVolonta() { return volonta; }
     public void setVolonta(int v) { this.volonta = v; }
     public BossMood getCurrentMood() { return currentMood; }
-    public AnomalieEngine getAnomalieEngine() { return anomalieEngine; }
-}
+    public AnomalieEngine getAnomalieEngine() {
+        return anomalieEngine;
+    }}

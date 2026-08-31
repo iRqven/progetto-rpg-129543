@@ -30,6 +30,11 @@ public class Player {
 
     private final List<String> ricordi = new ArrayList<>();
 
+    private String genereSprite = "male"; // di default
+
+    public String getGenereSprite() { return genereSprite; }
+    public void setGenereSprite(String genereSprite) { this.genereSprite = genereSprite; }
+
     public Player(String nome, String classe, String allineamento) {
         this.nome = Objects.requireNonNull(nome, "Il nome non può essere nullo.");
         this.classe = classe;

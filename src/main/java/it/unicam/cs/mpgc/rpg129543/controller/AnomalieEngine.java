@@ -9,7 +9,7 @@ import java.util.Random;
  * Gestisce la logica stocastica e casuale degli imprevisti interattivi nel Purgatorio.
  */
 public class AnomalieEngine {
-    private static final int RANGE_CASUALE = 4; // 1 possibilita su 4 -> 25% reale di innesco ad ogni turno
+    private static final int RANGE_CASUALE = 15;
     private static final int TRIGGER_EVENTO = 0;
 
     private static final int PATTO_HP_COST = 20;

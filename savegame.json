@@ -1,6 +1,6 @@
 {
   "nome" : "Anima",
-  "hp" : 84,
+  "hp" : 100,
   "hpMax" : 100,
   "karma" : 0,
   "livello" : 1,
@@ -11,5 +11,6 @@
   "determinazione" : 10,
   "resilienza" : 10,
   "sintonia" : 10,
-  "ricordi" : [ "Un fischietto d'ottone arrugginito." ]
+  "ricordi" : [ ],
+  "genereSprite" : "female"
 }

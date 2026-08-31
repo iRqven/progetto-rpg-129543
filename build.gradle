@@ -26,5 +26,5 @@ dependencies {
 }
 
 application {
-    mainClass = 'it.unicam.cs.mpgc.rpg129543.Main'
+    mainClass = 'it.unicam.cs.mpgc.rpg129543.Launcher'
 }

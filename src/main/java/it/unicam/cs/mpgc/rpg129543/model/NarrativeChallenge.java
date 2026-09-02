@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
+import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
 import java.util.Objects;
 
 /**
@@ -20,11 +21,11 @@ public class NarrativeChallenge implements Challenge {
     }
 
     @Override
-    public String risolvi(Player player, int pianoCorrente) {
+    public ChallengeResult risolvi(Player player, int pianoCorrente) {
         Objects.requireNonNull(player, "Player nullo durante la risoluzione narrativa.");
         this.completata = true;
 
-        return nomeNPC.toUpperCase() + ":\n" + dialogo + "\n\n[Sblocchi l'indizio: " + oggettoRilasciato + "]";
+        return new ChallengeResult(true, dialogo, 0, oggettoRilasciato);
     }
 
     @Override
@@ -37,4 +38,6 @@ public class NarrativeChallenge implements Challenge {
         return false;
     }
     @Override public boolean isSkillCheck() { return false; }
+
+    public String getNomeNPC() { return nomeNPC; }
 }

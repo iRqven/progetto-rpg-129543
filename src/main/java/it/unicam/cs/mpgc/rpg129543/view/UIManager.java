@@ -62,8 +62,8 @@ public class UIManager {
     }
 
     public static VBox createBattleTutorialMenu(String nomeBoss, String descBoss, int playerLevel, Runnable onStart) {
-        VBox layout = new VBox(15);
-        layout.setAlignment(Pos.CENTER);
+        // CORREZIONE GRAFICA: Usiamo il layout base con sfondo nero e bordi invece di un VBox vuoto
+        VBox layout = createBaseOverlay();
 
         Label t = new Label("SVELAMENTO DELLA VITTIMA: " + nomeBoss.toUpperCase());
         t.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 15px; -fx-font-family: 'Courier New';");
@@ -77,7 +77,6 @@ public class UIManager {
         if (playerLevel == 1) {
             Label tutTitolo = new Label("[REGISTRO DELLE DEBOLEZZE EMOTIVE]");
             tutTitolo.setStyle("-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New';");
-
             Label tutDesc = new Label(
                     "Durante lo scontro, seleziona la Virtù che contrasta l'Aura cromatico-emotiva della vittima:\n" +
                             "• Se lo stato è RABBIA -> Sferra PAZIENZA\n" +

@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
+import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
 import java.util.Objects;
 
 public class CombatChallenge implements Challenge {
@@ -21,8 +22,8 @@ public class CombatChallenge implements Challenge {
     }
 
     @Override
-    public String risolvi(Player player, int pianoId) {
-        return "START_COMBAT:" + nomeNemico;
+    public ChallengeResult risolvi(Player player, int pianoId) {
+        return new ChallengeResult(true, "START_COMBAT", 0, nomeNemico);
     }
 
     @Override

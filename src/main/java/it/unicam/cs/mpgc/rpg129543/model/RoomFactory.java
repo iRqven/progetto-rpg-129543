@@ -11,15 +11,18 @@ public class RoomFactory {
     public static List<Room> createRooms() {
         List<Room> rooms = new ArrayList<>();
 
-        // Room 0 (Piano 1) - SkillCheckChallenge (unchanged)
+        // Room 0 (Piano 1)
         rooms.add(new Room(0, "Piano 1: La Superbia",
                 "Il rimbombo sordo di un treno in avvicinamento fa tremare la nebbia, che assume la forma di specchi crepati. Un uomo anziano con una divisa logora da capostazione è bloccato sotto una grata di ferro.",
                 new SkillCheckChallenge("IL CAPOSTAZIONE:\n\"Ti ricordi di me? Camminavi sulla linea gialla ignorando i miei richiami, convinto che le regole non valessero per uno splendido uomo d'affari come te. Quando mi sono opposto ai tuoi traffici, mi hai fatto licenziare con false accuse, distruggendo la mia dignità. Ora sono io a terra. Vuoi piegare il tuo orgoglio per aiutarmi o passerai oltre pensando di essere superiore a un vecchio barbone?\""),
-                400, 300, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "Un suono acuto ti trapassa i timpani. Una banchina affollata. Qualcuno urlava di non oltrepassare la linea gialla.",
-                200, 400, true));
+                true,
+                "backgrounds/bg_0.jpg",
+                "doors/door_0.png",
+                "fragments/fragment_0.png"));
 
-        // Room 1 (Piano 2) - CombatChallenge
+        // Room 1 (Piano 2)
         rooms.add(new Room(1, "Piano 2: L'Invidia",
                 "L'aria sa di ferro e freni bruciati, tingendosi di un verde acido. Una figura con una giacca da ufficio strappata ti sbarra la strada.",
                 new CombatChallenge("Lo Spettro del Socio Tradito",
@@ -27,11 +30,14 @@ public class RoomFactory {
                         "Hai rubato la mia idea, ti sei arricchito sulle mie spalle, viscido parassita!",
                         "Sento ancora l'odore di bruciato dei bilanci falsi della tua società fantasma...",
                         "Mi fidavo di te... eravamo cresciuti insieme e mi hai addossato i tuoi debiti morali!"),
-                400, 300, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "L'invidia per il talento altrui mascherata da affari freddi. Un rancore coltivato all'ombra dei successi altrui.",
-                600, 100, true));
+                true,
+                "backgrounds/bg_1.jpg",
+                "doors/door_1.png",
+                "fragments/fragment_1.png"));
 
-        // Room 2 (Piano 3) - CombatChallenge
+        // Room 2 (Piano 3)
         rooms.add(new Room(2, "Piano 3: L'Ira",
                 "Le pareti sembrano fiamme grigie, illuminate a intermittenza come dai fari di un convoglio in corsa. Un'ombra imponente brandisce una sbarra di ferro.",
                 new CombatChallenge("L'Ombra del Padre Disperato",
@@ -39,21 +45,27 @@ public class RoomFactory {
                         "Hai minacciato la mia famiglia con la tua sicurezza! Ti strapperò quel sorriso arrogante!",
                         "Hai paura della mia mazza di ferro? Guarda cosa fa la disperazione di un padre!",
                         "Mio figlio aveva bisogno di cure e tu hai rubato i nostri risparmi senza battere ciglio!"),
-                300, 450, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "Fogli sparsi sul pavimento di marmo del tuo ufficio. 'Ti prego', implorava la voce. Tu hai semplicemente chiamato la sicurezza.",
-                100, 100, true));
+                true,
+                "backgrounds/bg_2.jpg",
+                "doors/door_2.png",
+                "fragments/fragment_2.png"));
 
-        // Room 3 (Piano 4) - NarrativeChallenge (unchanged)
+        // Room 3 (Piano 4)
         rooms.add(new Room(3, "Piano 4: L'Accidia",
                 "Una panchina di ferro di una vecchia stazione emerge dalla nebbia, scandita dal ticchettio invisibile di un orologio. C'è una donna seduta, immobile e fredda.",
                 new NarrativeChallenge("La Madre Impietrita",
                         "Sono rimasta seduta su questa banchina per giorni, con le valigie e i miei figli, dopo che il tuo finto fondo immobiliare ci ha portato via la casa. Sapevi benissimo cosa ci stava succedendo. Ti ho inviato decine di lettere, ma non hai mai risposto. La tua totale indifferenza ci ha ucciso dentro. E ora il tuo cuore è di pietra come me.",
                         "La busta è ancora sigillata. Sentivi il peso delle parole non lette, ma il rumore del traffico fuori dalla finestra era più interessante."),
-                400, 300, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "Una lettera di aiuto mai aperta.",
-                500, 200, true));
+                true,
+                "backgrounds/bg_3.jpg",
+                "doors/door_3.png",
+                "fragments/fragment_3.png"));
 
-        // Room 4 (Piano 5) - CombatChallenge
+        // Room 4 (Piano 5)
         rooms.add(new Room(4, "Piano 5: L'Avarizia",
                 "Il pavimento è coperto di monete di fumo. Sopra di te, un grande tabellone degli orari vuoto rotea furiosamente. Un'entità magra fluttua stringendo un salvadanaio vuoto.",
                 new CombatChallenge("Il Rimpianto del Giovane Operaio",
@@ -61,19 +73,25 @@ public class RoomFactory {
                         "Ti sei preso i miei cinque anni di turni di notte in fabbrica per comprarti vestiti di lusso!",
                         "Scappavi sulla banchina della stazione stringendo la valigia... ma da qui non scappi!",
                         "Credevo alle tue promesse di un investimento sicuro... mi hai lasciato senza un futuro!"),
-                350, 250, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "Soldi sottratti per riempire la valigia che avevi con te. Sulla banchina, il peso del cuoio era l'unica cosa reale.",
-                150, 350, true));
+                true,
+                "backgrounds/bg_4.jpg",
+                "doors/door_4.png",
+                "fragments/fragment_4.png"));
 
-        // Room 5 (Piano 6) - SkillCheckChallenge (unchanged)
+        // Room 5 (Piano 6)
         rooms.add(new Room(5, "Piano 6: La Gola",
                 "Un banchetto distorto coperto di cenere. In lontananza, una voce metallica annuncia un ritardo. Una gentile anziana signora fissa un piatto vuoto piangendo.",
                 new SkillCheckChallenge("LA GENTILE ANZIANA:\n\"Ti fidavi di me, mi portavi i pasticcini a casa per convincermi a firmare la girata della mia pensione. Mi hai lasciato senza un soldo persino per fare la spesa. Ho passato gli ultimi mesi della mia vita a pane e acqua per colpa dei tuoi contratti. Ora c'è un ultimo raggio di luce in questa stanza. La prenderai tutta per te o lancerai il dado per nutrirmi?\""),
-                400, 300, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "L'avidità di consumare tutto ciò che appartiene ad altri. Un vuoto incolmabile, anche davanti allo schianto imminente.",
-                200, 200, true));
+                true,
+                "backgrounds/bg_5.jpg",
+                "doors/door_5.png",
+                "fragments/fragment_5.png"));
 
-        // Room 6 (Piano 7) - CombatChallenge
+        // Room 6 (Piano 7)
         rooms.add(new Room(6, "Piano 7: Il Tradimento",
                 "L'orologio digitale sopra la porta d'uscita lampeggia rosso: 14:02. Davanti al portale finale c'è un'ombra speculare, vestita con abiti ordinari identici ai tuoi, ma con il volto coperto di sangue.",
                 new CombatChallenge("Lo Spettro del Complice",
@@ -81,9 +99,12 @@ public class RoomFactory {
                         "Mi hai spinto sotto le ruote del treno! Scudo umano... ecco cosa ero per te!",
                         "L'orologio scatta... senti il fischio del treno delle 14:02 che arriva?!",
                         "Abbiamo truffato mezza città insieme... come hai potuto tradirmi all'ultimo secondo?"),
-                500, 200, DOOR_X, DOOR_Y,
+                DOOR_X, DOOR_Y,
                 "14:02. Il rumore metallico dei freni. Due mani che spingono. Uno scudo di carne per salvarti la vita. Non è bastato.",
-                400, 400, true));
+                true,
+                "backgrounds/bg_6.jpg",
+                "doors/door_6.png",
+                "fragments/fragment_6.png"));
 
         return rooms;
     }

@@ -4,6 +4,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.animation.ScaleTransition;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 /**
  * Gestisce esclusivamente l'interfaccia grafica della barra di stato superiore (HUD).
@@ -52,5 +56,26 @@ public class HudView {
         labelKarma.setText("KARMA: " + karma);
         labelLivello.setText("LIVELLO ANIMA: " + livello + " (" + xpCorrenti + "/" + xpNecessari + " XP)");
         labelPiano.setText("PIANO CORRENTE: " + pianoCorrente);
+    }
+
+    public void evidenziaZainetto() {
+        // 1. Effetto Bagliore Dorato
+        DropShadow glow = new DropShadow();
+        glow.setColor(Color.GOLD);
+        glow.setRadius(20);
+        glow.setSpread(0.5);
+        zainettoBtn.setEffect(glow); // Corretto in zainettoBtn
+
+        // 2. Effetto Pulsazione (si ingrandisce e torna normale)
+        ScaleTransition battito = new ScaleTransition(Duration.millis(200), zainettoBtn); // Corretto in zainettoBtn
+        battito.setByX(0.3); // Aumenta del 30%
+        battito.setByY(0.3);
+        battito.setCycleCount(2);
+        battito.setAutoReverse(true); // Torna alla dimensione originale
+
+        // 3. Rimuovi il bagliore quando l'animazione finisce
+        battito.setOnFinished(e -> zainettoBtn.setEffect(null)); // Corretto in zainettoBtn
+
+        battito.play();
     }
 }

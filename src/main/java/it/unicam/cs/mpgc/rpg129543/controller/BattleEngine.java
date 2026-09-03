@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129543.controller;
 
+import it.unicam.cs.mpgc.rpg129543.api.BattleAction;
 import it.unicam.cs.mpgc.rpg129543.model.*;
 import java.util.Objects;
 import java.util.Random;
@@ -12,11 +13,6 @@ public class BattleEngine {
     private static final int HEAL_BASE = 25;
 
     public enum BossMood { RABBIA, PAURA, COLPA }
-
-    // Clean Code: Enum per vincolare le mosse possibili ed eliminare le Magic Strings
-    public enum BattleAction {
-        PAZIENZA, CORAGGIO, PERDONO, CURA, DIFESA, ACCETTA_PATTO, RIFIUTA_PATTO, UNKNOWN
-    }
 
     private BossMood currentMood;
     private final BossMood debolezzaBoss;
@@ -32,11 +28,10 @@ public class BattleEngine {
         this.currentMood = BossMood.values()[rand.nextInt(BossMood.values().length)];
     }
 
-    public String executeTurn(Player p, Enemy e, String mossaInput, GameState gameState) {
-        Objects.requireNonNull(p); Objects.requireNonNull(e);
-
-        // Traduciamo la stringa dell'interfaccia nel nostro Enum sicuro
-        BattleAction mossa = sanificaInput(mossaInput);
+    public String executeTurn(Player p, Enemy e, BattleAction mossa, GameState gameState) {
+        Objects.requireNonNull(p);
+        Objects.requireNonNull(e);
+        Objects.requireNonNull(mossa);
 
         if (anomalieEngine.isImprevistoAttivo()) {
             return gestisciAnomalia(p, e, mossa);
@@ -48,7 +43,6 @@ public class BattleEngine {
         int attacco = DAMAGE_BASE + (p.getDeterminazione() - 10);
         int cura = HEAL_BASE + (p.getSintonia() - 10) * 2;
 
-        // Lo switch ora si basa sull'Enum e non sulle stringhe!
         switch (mossa) {
             case PAZIENZA:
             case CORAGGIO:
@@ -83,7 +77,7 @@ public class BattleEngine {
                 break;
 
             default:
-                sb.append("Mossa sconosciuta.");
+                sb.append("Mossa non valida per il turno corrente.");
                 break;
         }
 
@@ -101,18 +95,6 @@ public class BattleEngine {
         if (anomalieEngine.controllaInnesco()) sb.append("\n\nLa nebbia pulsa...");
 
         return sb.toString();
-    }
-
-    private BattleAction sanificaInput(String input) {
-        String s = input.toUpperCase();
-        if (s.contains("PAZIENZA")) return BattleAction.PAZIENZA;
-        if (s.contains("CORAGGIO")) return BattleAction.CORAGGIO;
-        if (s.contains("PERDONO")) return BattleAction.PERDONO;
-        if (s.contains("CURA")) return BattleAction.CURA;
-        if (s.contains("DIFESA")) return BattleAction.DIFESA;
-        if (s.contains("ACCETTA")) return BattleAction.ACCETTA_PATTO;
-        if (s.contains("RIFIUTA")) return BattleAction.RIFIUTA_PATTO;
-        return BattleAction.UNKNOWN;
     }
 
     private String gestisciAnomalia(Player p, Enemy e, BattleAction mossa) {

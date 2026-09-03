@@ -1,11 +1,11 @@
 package it.unicam.cs.mpgc.rpg129543.controller;
 
+import it.unicam.cs.mpgc.rpg129543.api.BattleAction;
 import it.unicam.cs.mpgc.rpg129543.model.*;
 import it.unicam.cs.mpgc.rpg129543.view.BattleView;
 import it.unicam.cs.mpgc.rpg129543.view.MessageView;
 import it.unicam.cs.mpgc.rpg129543.view.UIManager;
 import javafx.scene.layout.VBox;
-
 import java.util.function.Consumer;
 
 /**
@@ -44,7 +44,6 @@ public class BattleController {
 
     public void startBattleTutorial(CombatChallenge combatChallenge) {
         onClearOverlay.run();
-
         VBox tutorialMenu = UIManager.createBattleTutorialMenu(
                 combatChallenge.getNomeNemico(),
                 combatChallenge.getDescrizioneDettagliata(),
@@ -62,18 +61,15 @@ public class BattleController {
                             combatChallenge.getfPaura(),
                             combatChallenge.getfColpa()
                     );
-
                     updateBattleUI("La nebbia si focalizza. Lo scontro ha inizio.");
                 }
         );
-
         onShowOverlay.accept(tutorialMenu);
     }
 
     private void updateBattleUI(String logText) {
         onClearOverlay.run();
 
-        // Vittoria
         if (currentEnemy.getHp() <= 0) {
             int premioXp = (gameState.getCurrentRoom().id() + 1) * 50;
             player.addKarma(30);
@@ -83,7 +79,6 @@ public class BattleController {
             if (haLivellato) {
                 onLevelUp.accept(premioXp);
             } else {
-                // Aspetta il click per sbloccare il gioco
                 finishInteraction("VITTORIA! Sconfiggi lo spettro ed accumuli +" + premioXp + " XP.", () -> {
                     player.setX(player.getX() + 60);
                     onUpdateHud.run();
@@ -91,27 +86,22 @@ public class BattleController {
                 });
             }
             return;
-        }
-        // Sconfitta
-        else if (player.getHp() <= 0) {
-            // Aspetta il click per resettare il gioco
-            finishInteraction("L'OSCURITÀ TI HA CONSUMATO...", () -> {
-                onGameOver.run();
-            });
+        } else if (player.getHp() <= 0) {
+            finishInteraction("L'OSCURITÀ TI HA CONSUMATO...", onGameOver);
             return;
         }
 
         BattleView battleView = new BattleView(
                 player, currentEnemy, currentBattle, logText, isInSubMenuVirtu,
-                mossa -> {
-                    if (mossa.equals("INDIETRO")) {
+                (BattleAction action) -> {
+                    if (action == BattleAction.INDIETRO) {
                         isInSubMenuVirtu = false;
                         updateBattleUI(logText);
-                    } else if (mossa.equals("APRI_VIRTU")) {
+                    } else if (action == BattleAction.APRI_VIRTU) {
                         isInSubMenuVirtu = true;
                         updateBattleUI(logText);
                     } else {
-                        processBattle(mossa);
+                        processBattle(action);
                     }
                 },
                 () -> {
@@ -127,17 +117,16 @@ public class BattleController {
         onShowOverlay.accept(battleView.getView());
     }
 
-    private void processBattle(String mossaInput) {
+    private void processBattle(BattleAction action) {
         String res = "";
 
-        if (mossaInput.equals("ACCETTA_PATTO")) {
+        if (action == BattleAction.ACCETTA_PATTO) {
             res = currentBattle.getAnomalieEngine().applicaSceltaA(player, currentEnemy, currentBattle);
-        } else if (mossaInput.equals("RIFIUTA_PATTO")) {
+        } else if (action == BattleAction.RIFIUTA_PATTO) {
             currentBattle.getAnomalieEngine().disattiva();
             res = "Hai rifiutato il patto con l'ignoto. L'illusione svanisce e lo scontro riprende.";
         } else {
-            String mossaPulita = mossaInput.split(" ")[0].trim();
-            res = currentBattle.executeTurn(player, currentEnemy, mossaPulita, gameState);
+            res = currentBattle.executeTurn(player, currentEnemy, action, gameState);
 
             if (currentEnemy.getHp() > 0 && player.getHp() > 0) {
                 currentBattle.getAnomalieEngine().controllaInnesco();
@@ -150,7 +139,6 @@ public class BattleController {
         updateBattleUI(res);
     }
 
-    // Aggiunto il parametro Runnable onClose per gestire l'azione DOPO il click
     private void finishInteraction(String text, Runnable onClose) {
         onClearOverlay.run();
         MessageView finishView = new MessageView(

@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129543.view;
 
+import it.unicam.cs.mpgc.rpg129543.api.BattleAction;
 import it.unicam.cs.mpgc.rpg129543.controller.BattleEngine;
 import it.unicam.cs.mpgc.rpg129543.model.Enemy;
 import it.unicam.cs.mpgc.rpg129543.model.Player;
@@ -17,7 +18,8 @@ import java.util.function.Consumer;
 public class BattleView {
     private final VBox layout;
 
-    public BattleView(Player player, Enemy currentEnemy, BattleEngine currentBattle, String logText, boolean isInSubMenuVirtu, Consumer<String> onAction, Runnable onFlee) {
+    // CORREZIONE: Consumer<BattleAction> invece di Consumer<String>
+    public BattleView(Player player, Enemy currentEnemy, BattleEngine currentBattle, String logText, boolean isInSubMenuVirtu, Consumer<BattleAction> onAction, Runnable onFlee) {
         layout = new VBox(12);
         layout.setAlignment(Pos.CENTER);
         layout.setPrefWidth(450);
@@ -32,7 +34,7 @@ public class BattleView {
         };
         auraLabel.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-family: 'Courier New';");
 
-        // 2. STATISTICHE (HBox affianca gli elementi in orizzontale)
+        // 2. STATISTICHE
         HBox statusBox = new HBox(20);
         statusBox.setAlignment(Pos.CENTER);
 
@@ -68,8 +70,9 @@ public class BattleView {
             btnAccetta.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
             btnRifiuta.setStyle(styleBtn + "-fx-base: #7f8c8d; -fx-text-fill: white;");
 
-            btnAccetta.setOnAction(e -> onAction.accept("ACCETTA_PATTO"));
-            btnRifiuta.setOnAction(e -> onAction.accept("RIFIUTA_PATTO"));
+            // CORREZIONE: Uso dell'Enum
+            btnAccetta.setOnAction(e -> onAction.accept(BattleAction.ACCETTA_PATTO));
+            btnRifiuta.setOnAction(e -> onAction.accept(BattleAction.RIFIUTA_PATTO));
             menuLotta.add(btnAccetta, 0, 0);
             menuLotta.add(btnRifiuta, 1, 0);
         }
@@ -85,10 +88,11 @@ public class BattleView {
             btnPer.setStyle(styleBtn + "-fx-base: #f39c12; -fx-text-fill: white;");
             btnIndietro.setStyle(styleBtn + "-fx-base: #7f8c8d; -fx-text-fill: white;");
 
-            btnPaz.setOnAction(e -> onAction.accept("PAZIENZA"));
-            btnCor.setOnAction(e -> onAction.accept("CORAGGIO"));
-            btnPer.setOnAction(e -> onAction.accept("PERDONO"));
-            btnIndietro.setOnAction(e -> onAction.accept("INDIETRO"));
+            // CORREZIONE: Uso dell'Enum
+            btnPaz.setOnAction(e -> onAction.accept(BattleAction.PAZIENZA));
+            btnCor.setOnAction(e -> onAction.accept(BattleAction.CORAGGIO));
+            btnPer.setOnAction(e -> onAction.accept(BattleAction.PERDONO));
+            btnIndietro.setOnAction(e -> onAction.accept(BattleAction.INDIETRO));
 
             menuLotta.add(btnPaz, 0, 0); menuLotta.add(btnCor, 1, 0);
             menuLotta.add(btnPer, 0, 1); menuLotta.add(btnIndietro, 1, 1);
@@ -105,9 +109,10 @@ public class BattleView {
             btnCur.setStyle(styleBtn + "-fx-base: #8e44ad; -fx-text-fill: white;");
             btnFug.setStyle(styleBtn + "-fx-base: #7f8c8d; -fx-text-fill: white;");
 
-            btnApriVirtu.setOnAction(e -> onAction.accept("APRI_VIRTU"));
-            btnDef.setOnAction(e -> onAction.accept("DIFESA"));
-            btnCur.setOnAction(e -> onAction.accept("CURA"));
+            // CORREZIONE: Uso dell'Enum
+            btnApriVirtu.setOnAction(e -> onAction.accept(BattleAction.APRI_VIRTU));
+            btnDef.setOnAction(e -> onAction.accept(BattleAction.DIFESA));
+            btnCur.setOnAction(e -> onAction.accept(BattleAction.CURA));
             btnFug.setOnAction(e -> onFlee.run());
 
             menuLotta.add(btnApriVirtu, 0, 0); menuLotta.add(btnDef, 1, 0);

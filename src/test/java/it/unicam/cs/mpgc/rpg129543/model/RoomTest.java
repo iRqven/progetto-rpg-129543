@@ -7,10 +7,12 @@ class RoomTest {
 
     @Test
     void testDistanzaMinimaBossFrammento() {
-        // Creiamo una stanza generica (il costruttore calcolerà le coordinate random)
-        Room room = new Room(1, "Stanza Test", "Descrizione", null,
-                730.0, 300.0, "Ricordo", true,
+        // Creiamo la configurazione raggruppata
+        RoomConfig config = new RoomConfig(730.0, 300.0, "Ricordo", true,
                 "bg.jpg", "door.png", "frag.png");
+
+        // Passiamo il DTO al costruttore snellito
+        Room room = new Room(1, "Stanza Test", "Descrizione", null, config);
 
         // Calcoliamo la distanza euclidea generata
         double distanzaX = Math.pow(room.fragX() - room.npcX(), 2);
@@ -23,8 +25,9 @@ class RoomTest {
 
     @Test
     void testRisoluzioneSfida() {
-        Room room = new Room(1, "Stanza Test", "Desc", null,
-                730, 300, "Ric", false, "bg", "door", "frag");
+        RoomConfig config = new RoomConfig(730.0, 300.0, "Ric", false,
+                "bg", "door", "frag");
+        Room room = new Room(1, "Stanza Test", "Desc", null, config);
 
         room.solveChallenge();
         assertTrue(room.isSfidaGestita(), "La stanza deve risultare 'gestita' dopo aver risolto la sfida.");

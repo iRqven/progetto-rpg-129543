@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
+import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
 import java.util.Objects;
 
 public class CombatChallenge implements Challenge {
@@ -30,12 +31,9 @@ public class CombatChallenge implements Challenge {
     public boolean isCompletata() { return completata; }
 
     @Override
-    public boolean isCombat() { return true; }
-
-    @Override public boolean isSkillCheck() { return false; }
+    public ChallengeType getTipo() { return ChallengeType.COMBAT; }
 
     public void setCompletata(boolean completata) { this.completata = completata; }
-
     public String getNomeNemico() { return nomeNemico; }
     public String getDescrizioneDettagliata() { return descrizioneDettagliata; }
     public String getfRabbia() { return fRabbia; }

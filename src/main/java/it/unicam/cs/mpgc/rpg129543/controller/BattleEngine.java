@@ -88,7 +88,11 @@ public class BattleEngine {
 
         sb.append("\n\n[").append(e.getNome().toUpperCase()).append("]\n");
         sb.append(e.getFraseTipica(currentMood.name())).append("\n");
-        int bossDmg = (12 + rand.nextInt(6)) / (staDifendendo ? 2 : 1);
+
+        // SCALING DANNI: I boss infliggono +8 danni base per ogni run
+        int scalingDanni = (p.getRunCorrente() - 1) * 8;
+        int bossDmg = (12 + scalingDanni + rand.nextInt(6)) / (staDifendendo ? 2 : 1);
+
         p.takeDamage(bossDmg);
         sb.append("Subisci ").append(bossDmg).append(" HP.");
 

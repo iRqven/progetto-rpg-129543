@@ -115,7 +115,7 @@ public class UIManager {
         return overlay;
     }
 
-    public static ScrollPane createFinalJudgmentMenu(int karma, Runnable onRestart) {
+    public static ScrollPane createFinalJudgmentMenu(int karma, Runnable onRestart, Runnable onLoop) {
         VBox endLayout = new VBox(15);
         endLayout.setAlignment(Pos.CENTER);
         endLayout.setStyle("-fx-background-color: black; -fx-padding: 20;");
@@ -139,19 +139,20 @@ public class UIManager {
         String styleBtn = "-fx-min-width: 280; -fx-min-height: 40; -fx-font-weight: bold; -fx-font-size: 12px;";
 
         if (karma >= 40) {
-            esitoCondanna.setText("• EPILOGO: IL LOOP DELL'ILLUSIONE (Karma Alto) •\nHai cercato la via della bontà, ma la redenzione è un miraggio. La tua memoria viene completamente azzerata: verrai rispedito al Piano 1 per ricominciare da capo, alimentando l'eterna illusione di poterti salvare la prossima volta.");
+            esitoCondanna.setText("• EPILOGO: L'OBLIO ASSOLUTO (Karma Alto) •\nHai cercato la via della bontà, ma la redenzione è impossibile per chi ha seminato morte. Il Giudice ti concede l'unica vera pace: la cancellazione. La tua anima e i tuoi ricordi vengono annientati, scomparendo nel nulla, come se non fossi mai esistito.");
             esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #3498db;");
-            azioneBtn.setText("Ricomincia l'Illusione (Torna al Piano 1)");
+            azioneBtn.setText("Accetta l'Oblio (Hard Reset Totale)");
             azioneBtn.setStyle(styleBtn + "-fx-base: #2980b9; -fx-text-fill: white;");
+            azioneBtn.setOnAction(e -> onRestart.run()); // Azzeramento totale
         } else {
-            esitoCondanna.setText("• EPILOGO: IL CARNEFICE CONSAPEVOLE (Karma Basso) •\nHai scelto l'indifferenza e la fuga. La maschera cade definitivamente: accetti la tua natura di carnefice. Resterai confinato in questo inferno circolare, condannato a tormentare e a essere tormentato dai tuoi stessi fantasmi per l'eternità.");
+            esitoCondanna.setText("• EPILOGO: LA DANNAZIONE CICLICA (Karma Basso) •\nHai scelto l'indifferenza e la violenza. Il Giudice sorride: la maschera è caduta. La stazione si resetta e i morti si rialzano. Tornerai all'ingresso del Purgatorio conservando la tua rabbia, i tuoi livelli e i tuoi tristi ricordi, condannato ad affrontare un ciclo ancora più violento.");
             esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #c0392b;");
-            azioneBtn.setText("Accetta il Ruolo di Carnefice (Ricomincia il Ciclo)");
+            azioneBtn.setText("Ricomincia il Ciclo (Mantieni Statistiche: New Game+)");
             azioneBtn.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
+            azioneBtn.setOnAction(e -> onLoop.run()); // Innesco del Loop "New Game+"
         }
         esitoCondanna.setWrapText(true);
         esitoCondanna.setMaxWidth(720);
-        azioneBtn.setOnAction(e -> onRestart.run());
 
         endLayout.getChildren().addAll(titoloOrologio, rivelazioneGiudice, esitoCondanna, azioneBtn);
 

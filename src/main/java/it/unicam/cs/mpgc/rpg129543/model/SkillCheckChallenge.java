@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg129543.model;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
+import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
 import java.util.Objects;
 import java.util.Random;
 
@@ -21,10 +22,7 @@ public class SkillCheckChallenge implements Challenge {
     public String getDialogo() { return dialogo; }
 
     @Override
-    public boolean isCombat() { return false; }
-
-    @Override
-    public boolean isSkillCheck() { return true; }
+    public ChallengeType getTipo() { return ChallengeType.SKILL_CHECK; }
 
     @Override
     public ChallengeResult risolvi(Player player, int pianoId) {

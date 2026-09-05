@@ -1,18 +1,14 @@
 package it.unicam.cs.mpgc.rpg129543.controller;
 
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
+import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
 import it.unicam.cs.mpgc.rpg129543.model.*;
 import it.unicam.cs.mpgc.rpg129543.view.GameView;
 import it.unicam.cs.mpgc.rpg129543.view.HudView;
 import javafx.scene.input.KeyCode;
 import java.util.function.Consumer;
 
-/**
- * Controller dedicato alla fisica, al movimento e al rilevamento delle collisioni.
- */
 public class GameController {
-
-    // Limiti fisici della mappa (Clean Code: rimozione Magic Numbers)
     private static final double MIN_X = 20.0;
     private static final double MAX_X = 780.0;
     private static final double MIN_Y = 20.0;
@@ -23,10 +19,8 @@ public class GameController {
     private final GameView gameView;
     private final HudView hudView;
     private final InputController inputController;
-
     private boolean isInteracting = false;
 
-    // Callbacks di instradamento per delegare le schermate grafiche all'App principale
     private final Consumer<Challenge> onStartCombat;
     private final Consumer<Challenge> onStartSkillCheck;
     private final Consumer<Challenge> onStartNarrative;
@@ -63,15 +57,12 @@ public class GameController {
 
     private void updatePhysics() {
         boolean isMoving = false;
-
         if (inputController.isPressed(KeyCode.W) || inputController.isPressed(KeyCode.UP)) { player.moveUp(); isMoving = true; }
         if (inputController.isPressed(KeyCode.S) || inputController.isPressed(KeyCode.DOWN)) { player.moveDown(); isMoving = true; }
         if (inputController.isPressed(KeyCode.A) || inputController.isPressed(KeyCode.LEFT)) { player.moveLeft(); isMoving = true; }
         if (inputController.isPressed(KeyCode.D) || inputController.isPressed(KeyCode.RIGHT)) { player.moveRight(); isMoving = true; }
-
         gameView.updateAnimation(isMoving, player);
 
-        // Applica i limiti della mappa usando le costanti
         if (player.getX() < MIN_X) player.setX(MIN_X);
         if (player.getX() > MAX_X) player.setX(MAX_X);
         if (player.getY() < MIN_Y) player.setY(MIN_Y);
@@ -86,29 +77,37 @@ public class GameController {
         double distFrag = calcolaDistanza(player.getX(), player.getY(), current.fragX(), current.fragY());
         double distToDoor = calcolaDistanza(player.getX(), player.getY(), current.doorX(), current.doorY());
 
-        // 1. Controllo Boss
+        // 1. Controllo Boss (Polimorfismo applicato con switch su enum)
         if (current.hasChallenge() && distBoss < Room.INTERACTION_RADIUS_BOSS) {
             isInteracting = true;
             if (current.isSfidaGestita()) {
                 onLoreOnly.accept(current);
             } else {
                 Challenge c = current.sfida();
-                if (c.isCombat()) onStartCombat.accept(c);
-                else if (c.isSkillCheck()) onStartSkillCheck.accept(c);
-                else onStartNarrative.accept(c);
+                switch (c.getTipo()) {
+                    case COMBAT -> onStartCombat.accept(c);
+                    case SKILL_CHECK -> onStartSkillCheck.accept(c);
+                    case NARRATIVE -> onStartNarrative.accept(c);
+                }
             }
             return;
         }
 
         // 2. Controllo Frammento
-        if (current.hasFragment() && !player.getRicordi().contains(current.ricordoSbloccato()) && distFrag < Room.INTERACTION_RADIUS_FRAG) {
+        if (current.hasFragment() && !current.isFrammentoRaccolto() && distFrag < Room.INTERACTION_RADIUS_FRAG) {
             isInteracting = true;
-            player.addRicordo(current.ricordoSbloccato());
-
-            gameView.avviaAnimazioneRaccolta(current, 750.0, 50.0);
-            if (hudView != null) hudView.evidenziaZainetto();
-
-            onMemoryCollected.accept(current.ricordoSbloccato());
+            current.setFrammentoRaccolto(true);
+            if (player.getRicordi().contains(current.ricordoSbloccato())) {
+                player.setHp(player.getHp() + 30);
+                player.addKarma(10);
+                gameView.avviaAnimazioneRaccolta(current, 750.0, 50.0);
+                onMemoryCollected.accept("RISONANZA SPIRITUALE\n\nHai già vissuto questo dolore. La consapevolezza ti rigenera 30 HP e consolida il tuo Karma (+10).");
+            } else {
+                player.addRicordo(current.ricordoSbloccato());
+                gameView.avviaAnimazioneRaccolta(current, 750.0, 50.0);
+                if (hudView != null) hudView.evidenziaZainetto();
+                onMemoryCollected.accept(current.ricordoSbloccato());
+            }
             return;
         }
 

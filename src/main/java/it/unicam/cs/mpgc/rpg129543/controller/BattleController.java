@@ -53,9 +53,12 @@ public class BattleController {
                     currentBattle = new BattleEngine(mood);
                     isInSubMenuVirtu = false;
 
+                    // SCALING HP: +50 HP base per ogni Run successiva alla prima
+                    int bossMaxHp = 100 + ((player.getRunCorrente() - 1) * 50);
+
                     currentEnemy = new Enemy(
                             combatChallenge.getNomeNemico(),
-                            100,
+                            bossMaxHp,
                             mood.name(),
                             combatChallenge.getfRabbia(),
                             combatChallenge.getfPaura(),

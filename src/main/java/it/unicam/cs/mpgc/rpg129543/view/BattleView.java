@@ -41,8 +41,7 @@ public class BattleView {
         Label playerStats = new Label("TUOI HP: " + player.getHp() + "/" + player.getHpMax() + "\nVOLONTÀ: " + currentBattle.getVolonta() + "/8");
         playerStats.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New'; -fx-text-alignment: center;");
 
-        Label enemyStats = new Label("NEMICO HP: " + currentEnemy.getHp() + "/100\nATK: " + player.getDeterminazione());
-        enemyStats.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New'; -fx-text-alignment: center;");
+        Label enemyStats = new Label("NEMICO HP: " + currentEnemy.getHp() + "/" + currentEnemy.getHpMax() + "\nSCALATO: LIV " + player.getRunCorrente());        enemyStats.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New'; -fx-text-alignment: center;");
 
         statusBox.getChildren().addAll(playerStats, enemyStats);
 

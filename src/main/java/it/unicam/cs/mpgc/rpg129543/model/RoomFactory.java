@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
-import it.unicam.cs.mpgc.rpg129543.api.Challenge;
+import it.unicam.cs.mpgc.rpg129543.util.DefaultRandomSource;
+import it.unicam.cs.mpgc.rpg129543.util.RandomSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,66 +11,60 @@ public class RoomFactory {
 
     public static List<Room> createRooms() {
         List<Room> rooms = new ArrayList<>();
+        RandomSource random = new DefaultRandomSource();
 
-        // Room 0 (Piano 1)
         rooms.add(new Room(0, "Piano 1: La Superbia",
-                "Il rimbombo sordo di un treno in avvicinamento fa tremare la nebbia, che assume la forma di specchi crepati. Un uomo anziano con una divisa logora da capostazione è bloccato sotto una grata di ferro.",
-                new SkillCheckChallenge("IL CAPOSTAZIONE:\n\"Ti ricordi di me? Camminavi sulla linea gialla ignorando i miei richiami, convinto che le regole non valessero per uno splendido uomo d'affari come te. Quando mi sono opposto ai tuoi traffici, mi hai fatto licenziare con false accuse, distruggendo la mia dignità. Ora sono io a terra. Vuoi piegare il tuo orgoglio per aiutarmi o passerai oltre pensando di essere superiore a un vecchio barbone?\""),
-                new RoomConfig(DOOR_X, DOOR_Y, "Un suono acuto ti trapassa i timpani. Una banchina affollata. Qualcuno urlava di non oltrepassare la linea gialla.", true, "backgrounds/bg_0.jpg", "doors/door_0.png", "fragments/fragment_0.png")));
+                "Il rimbombo sordo di un treno in avvicinamento fa tremare la nebbia. Un uomo anziano con una divisa logora da capostazione è bloccato sotto una grata di ferro.",
+                new SkillCheckChallenge("IL CAPOSTAZIONE:\n\"Ancora tu. Quante volte hai superato quella linea gialla? L'orologio gira, ma tu sei sempre qui, schiacciato dallo stesso orgoglio che ti ha reso sordo al mio fischietto. Ti piegherai questa volta, o aspetterai il prossimo impatto?\""),
+                new RoomConfig(DOOR_X, DOOR_Y, "Un suono acuto ti trapassa i timpani. Una banchina affollata. Qualcuno urlava di non oltrepassare il limite.", true, "backgrounds/bg_0.jpg", "doors/door_0.png", "fragments/fragment_0.png"), random));
 
-        // Room 1 (Piano 2)
         rooms.add(new Room(1, "Piano 2: L'Invidia",
                 "L'aria sa di ferro e freni bruciati, tingendosi di un verde acido. Una figura con una giacca da ufficio strappata ti sbarra la strada.",
                 new CombatChallenge("Lo Spettro del Socio Tradito",
-                        "Non sopportavi che fossi io quello talentuoso, vero? Non sopportavi che la gente si fidasse di me. Così hai firmato quei maledetti documenti a mio nome, mi hai rubato l'idea e mi hai addossato i debiti della tua prima società fantasma. Affrontami, ladro!",
-                        "Hai rubato la mia idea, ti sei arricchito sulle mie spalle, viscido parassita!",
-                        "Sento ancora l'odore di bruciato dei bilanci falsi della tua società fantasma...",
-                        "Mi fidavo di te... eravamo cresciuti insieme e mi hai addossato i tuoi debiti morali!"),
-                new RoomConfig(DOOR_X, DOOR_Y, "L'invidia per il talento altrui mascherata da affari freddi. Un rancore coltivato all'ombra dei successi altrui.", true, "backgrounds/bg_1.jpg", "doors/door_1.png", "fragments/fragment_1.png")));
+                        "Sento l'odore dell'inchiostro fresco sui miei progetti... quelli che hai firmato tu. Ogni volta che torni, la cicatrice brucia. Guardati: cerchi una via d'uscita rubando i meriti altrui, ma questa nebbia non puoi frodarla.",
+                        "Hai rubato la mia firma! Questa prigione di nebbia è opera tua!",
+                        "Sento ancora il rumore dei fogli strappati... non puoi fuggire all'infinito.",
+                        "Eravamo fratelli... e mi hai condannato ai tuoi debiti morali."),
+                new RoomConfig(DOOR_X, DOOR_Y, "L'invidia mascherata da affari freddi. Un rancore coltivato all'ombra dei successi altrui.", true, "backgrounds/bg_1.jpg", "doors/door_1.png", "fragments/fragment_1.png"), random));
 
-        // Room 2 (Piano 3)
         rooms.add(new Room(2, "Piano 3: L'Ira",
-                "Le pareti sembrano fiamme grigie, illuminate a intermittenza come dai fari di un convoglio in corsa. Un'ombra imponente brandisce una sbarra di ferro.",
+                "Le pareti sembrano fiamme grigie, illuminate a intermittenza come dai fari di un convoglio in corsa.",
                 new CombatChallenge("L'Ombra del Padre Disperato",
-                        "Ricordi quando sono venuto nel tuo ufficio a implorarti? Ti ho urlato contro, ero fuori di me perché avevi rubato i soldi per le cure di mio figlio! E tu cosa hai fatto? Hai chiamato la tua sicurezza e mi hai fatto minacciare. La mia ira era giusta, la tua era spietata. Combattimi!",
-                        "Hai minacciato la mia famiglia con la tua sicurezza! Ti strapperò quel sorriso arrogante!",
-                        "Hai paura della mia mazza di ferro? Guarda cosa fa la disperazione di un padre!",
-                        "Mio figlio aveva bisogno di cure e tu hai rubato i nostri risparmi senza battere ciglio!"),
-                new RoomConfig(DOOR_X, DOOR_Y, "Fogli sparsi sul pavimento di marmo del tuo ufficio. 'Ti prego', implorava la voce. Tu hai semplicemente chiamato la sicurezza.", true, "backgrounds/bg_2.jpg", "doors/door_2.png", "fragments/fragment_2.png")));
+                        "La sicurezza mi ha trascinato fuori dal tuo ufficio innumerevoli volte. E innumerevoli volte io torno con questa spranga. I soldi di mio figlio sono cenere, ma la mia rabbia è un binario che percorrerai per l'eternità.",
+                        "Guarda cosa fa la disperazione! Ti spezzerò in ogni singolo ciclo!",
+                        "Hai paura del metallo? È freddo esattamente come il tuo cuore!",
+                        "Mio figlio... avevi i nostri risparmi in pugno e non hai mosso un dito."),
+                new RoomConfig(DOOR_X, DOOR_Y, "Fogli sparsi su un pavimento di marmo. 'Ti prego', implorava la voce. Tu chiamasti la sicurezza.", true, "backgrounds/bg_2.jpg", "doors/door_2.png", "fragments/fragment_2.png"), random));
 
-        // Room 3 (Piano 4)
         rooms.add(new Room(3, "Piano 4: L'Accidia",
-                "Una panchina di ferro di una vecchia stazione emerge dalla nebbia, scandita dal ticchettio invisibile di un orologio. C'è una donna seduta, immobile e fredda.",
+                "Una panchina di ferro emerge dalla nebbia, scandita dal ticchettio di un orologio. C'è una donna seduta, immobile.",
                 new NarrativeChallenge("La Madre Impietrita",
-                        "Sono rimasta seduta su questa banchina per giorni, con le valigie e i miei figli, dopo che il tuo finto fondo immobiliare ci ha portato via la casa. Sapevi benissimo cosa ci stava succedendo. Ti ho inviato decine di lettere, ma non hai mai risposto. La tua totale indifferenza ci ha ucciso dentro. E ora il tuo cuore è di pietra come me.",
-                        "La busta è ancora sigillata. Sentivi il peso delle parole non lette, ma il rumore del traffico fuori dalla finestra era più interessante."),
-                new RoomConfig(DOOR_X, DOOR_Y, "Una lettera di aiuto mai aperta.", true, "backgrounds/bg_3.jpg", "doors/door_3.png", "fragments/fragment_3.png")));
+                        "Le lettere si accumulano. Sigillate. Il freddo di questa panchina è nulla in confronto al gelo del tuo silenzio. Continui a passare di qui, ciclo dopo ciclo, sperando che il tempo cancelli ciò che non hai mai voluto guardare.",
+                        "Il peso di una busta mai aperta. Il sigillo è intatto, l'indifferenza eterna."),
+                new RoomConfig(DOOR_X, DOOR_Y, "Una richiesta d'aiuto sepolta sotto il rumore del traffico fuori dalla finestra.", true, "backgrounds/bg_3.jpg", "doors/door_3.png", "fragments/fragment_3.png"), random));
 
-        // Room 4 (Piano 5)
         rooms.add(new Room(4, "Piano 5: L'Avarizia",
-                "Il pavimento è coperto di monete di fumo. Sopra di te, un grande tabellone degli orari vuoto rotea furiosamente. Un'entità magra fluttua stringendo un salvadanaio vuoto.",
+                "Il pavimento è coperto di monete di fumo. Un grande tabellone degli orari vuoto rotea furiosamente.",
                 new CombatChallenge("Il Rimpianto del Giovane Operaio",
-                        "Erano cinque anni di turni di notte in fabbrica. Cinque anni di sacrifici che ti ho consegnato in mano, credendo alle tue promesse di un futuro sicuro. Ti sei preso tutto per comprarti macchine e vestiti. Anche sulla banchina della stazione, scappavi stringendo la valigia con i MIEI soldi!",
-                        "Ti sei preso i miei cinque anni di turni di notte in fabbrica per comprarti vestiti di lusso!",
-                        "Scappavi sulla banchina della stazione stringendo la valigia... ma da qui non scappi!",
-                        "Credevo alle tue promesse di un investimento sicuro... mi hai lasciato senza un futuro!"),
-                new RoomConfig(DOOR_X, DOOR_Y, "Soldi sottratti per riempire la valigia che avevi con te. Sulla banchina, il peso del cuoio era l'unica cosa reale.", true, "backgrounds/bg_4.jpg", "doors/door_4.png", "fragments/fragment_4.png")));
+                        "La valigia di cuoio pesa, vero? È piena dei miei turni di notte. Corri verso il binario, ogni singola volta, ma il treno per la salvezza non arriva mai per chi ha le tasche gonfie del sangue altrui.",
+                        "Mi hai rubato il futuro per comprarti vestiti su misura!",
+                        "Corri sulla banchina... ma il peso della valigia ti trascina a fondo!",
+                        "Credevo in te. Ho lavorato al buio solo per arricchire la tua ombra."),
+                new RoomConfig(DOOR_X, DOOR_Y, "Sulla banchina, il peso del cuoio della valigia era l'unica cosa che ti sembrava reale.", true, "backgrounds/bg_4.jpg", "doors/door_4.png", "fragments/fragment_4.png"), random));
 
-        // Room 5 (Piano 6)
         rooms.add(new Room(5, "Piano 6: La Gola",
-                "Un banchetto distorto coperto di cenere. In lontananza, una voce metallica annuncia un ritardo. Una gentile anziana signora fissa un piatto vuoto piangendo.",
-                new SkillCheckChallenge("LA GENTILE ANZIANA:\n\"Ti fidavi di me, mi portavi i pasticcini a casa per convincermi a firmare la girata della mia pensione. Mi hai lasciato senza un soldo persino per fare la spesa. Ho passato gli ultimi mesi della mia vita a pane e acqua per colpa dei tuoi contratti. Ora c'è un ultimo raggio di luce in questa stanza. La prenderai tutta per te o lancerai il dado per nutrirmi?\""),
-                new RoomConfig(DOOR_X, DOOR_Y, "L'avidità di consumare tutto ciò che appartiene ad altri. Un vuoto incolmabile, anche davanti allo schianto imminente.", true, "backgrounds/bg_5.jpg", "doors/door_5.png", "fragments/fragment_5.png")));
+                "Un banchetto distorto coperto di cenere. In lontananza, una voce metallica annuncia un ritardo.",
+                new SkillCheckChallenge("LA GENTILE ANZIANA:\n\"Un altro pasticcino? Un'altra firma sulla pensione? Hai divorato tutto quello che avevo, lasciandomi al freddo. Ogni volta che torni in questa stanza, il tuo vuoto è sempre più grande. Lancia il dado, vediamo se questa volta troverai la sazietà.\""),
+                new RoomConfig(DOOR_X, DOOR_Y, "L'avidità di consumare. Un vuoto incolmabile, anche un istante prima dello schianto.", true, "backgrounds/bg_5.jpg", "doors/door_5.png", "fragments/fragment_5.png"), random));
 
-        // Room 6 (Piano 7)
         rooms.add(new Room(6, "Piano 7: Il Tradimento",
-                "L'orologio digitale sopra la porta d'uscita lampeggia rosso: 14:02. Davanti al portale finale c'è un'ombra speculare, vestita con abiti ordinari identici ai tuoi, ma con il volto coperto di sangue.",
+                "L'orologio digitale lampeggia rosso: 14:02. Un'ombra speculare, vestita con abiti identici ai tuoi, ha il volto coperto di sangue.",
                 new CombatChallenge("Lo Spettro del Complice",
-                        "Eravamo d'accordo. Abbiamo truffato mezza città insieme, usando il nostro fascino e le nostre bugie. Ma quando la polizia ci ha messi all'angolo su quella banchina alle 14:02, hai pensato solo a te stesso. Mi hai spinto sotto il treno per rallentare la mia corsa e usarmi come scudo umano. Ma siamo caduti entrambi. Guarda cosa hai fatto al tuo unico amico.",
-                        "Mi hai spinto sotto le ruote del treno! Scudo umano... ecco cosa ero per te!",
-                        "L'orologio scatta... senti il fischio del treno delle 14:02 che arriva?!",
-                        "Abbiamo truffato mezza città insieme... come hai potuto tradirmi all'ultimo secondo?"),
-                new RoomConfig(DOOR_X, DOOR_Y, "14:02. Il rumore metallico dei freni. Due mani che spingono. Uno scudo di carne per salvarti la vita. Non è bastato.", true, "backgrounds/bg_6.jpg", "doors/door_6.png", "fragments/fragment_6.png")));
+                        "14:02. Il fischio. Le tue mani sulla mia schiena. Mi usi come scudo sotto le ruote del treno, ciclo dopo ciclo. Ma cadiamo sempre insieme. L'orologio sta per scattare di nuovo. Pronti al prossimo impatto?",
+                        "Mi hai spinto sotto le ruote! Il mio sangue è sui tuoi abiti!",
+                        "14:02... lo senti il rumore dei freni che si spezzano?!",
+                        "Eravamo complici fino all'ultimo secondo... prima della spinta."),
+                new RoomConfig(DOOR_X, DOOR_Y, "14:02. Due mani che spingono. Uno scudo di carne per salvarti la vita. Non è bastato.", true, "backgrounds/bg_6.jpg", "doors/door_6.png", "fragments/fragment_6.png"), random));
 
         return rooms;
     }

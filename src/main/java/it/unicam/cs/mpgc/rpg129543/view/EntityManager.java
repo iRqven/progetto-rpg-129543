@@ -66,17 +66,14 @@ public class EntityManager {
     }
 
     private Node createFragmentEntity(Room currentRoom, Player player) {
-        if (currentRoom.hasFragment() && !player.getRicordi().contains(currentRoom.ricordoSbloccato())) {
-
+        if (currentRoom.hasFragment() && !currentRoom.isFrammentoRaccolto()) {
             Image fragImg = AssetManager.getImage(currentRoom.fragmentAssetName());
 
             if (fragImg != null && !fragImg.isError()) {
                 ImageView fragView = new ImageView(fragImg);
-
                 double imgW = fragImg.getWidth();
                 double imgH = fragImg.getHeight();
 
-                // AUMENTATO A 65 (prima era 40)
                 double targetHeight = 65.0;
                 double targetWidth = targetHeight * (imgW / imgH);
 

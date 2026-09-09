@@ -8,21 +8,10 @@ public interface Challenge {
 
     boolean isCompletata();
 
-    /**
-     * Tipo della sfida. Sostituisce isCombat()/isSkillCheck(): il chiamante
-     * può fare un semplice switch invece di una catena di if/else su flag booleani,
-     * ed è più facile aggiungere un nuovo tipo di sfida in futuro.
-     */
+    /** Tipo della sfida, usato per lo switch di dispatch nel controller. */
     ChallengeType getTipo();
 
-    /**
-     * Segnala alla sfida che è stata risolta da un evento esterno
-     * (es. vittoria in combattimento gestita da BattleEngine).
-     * Sostituisce il precedente controllo "instanceof CombatChallenge" fatto da Room,
-     * che rompeva l'incapsulamento facendo un cast esplicito sull'interfaccia.
-     * Le sfide che si auto-completano già dentro risolvi() possono ignorare questo metodo.
-     */
+    /** Segnala il completamento da un evento esterno (es. vittoria in combattimento). */
     default void markCompleted() {
-        // no-op di default
     }
 }

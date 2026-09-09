@@ -2,12 +2,11 @@ package it.unicam.cs.mpgc.rpg129543.controller;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Controller dedicato alla gestione degli input da tastiera.
- */
+/** Gestisce gli input da tastiera. */
 public class InputController {
     private final Set<KeyCode> pressedKeys = new HashSet<>();
     private final Runnable onEscapePressed;

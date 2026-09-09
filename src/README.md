@@ -1,138 +1,102 @@
-```markdown
-# 📌 Purgatorio RPG
+# Purgatorio RPG
 
-Purgatorio RPG è un'avventura narrativa ed esplorativa con visuale top-down. Il giocatore impersona un'entità spettrale intrappolata in una stazione ferroviaria avvolta nella nebbia, costretta ad affrontare i rimorsi del proprio passato tramite scelte morali (Karma) e combattimenti a turni basati sull'intelligenza emotiva.
+**Progetto d'esame per Informatica per la Comunicazione Digitale**
+*Università degli Studi di Camerino*
+*Sviluppato da: Nicoletta Ciaffoni (Matricola: 129543)*
 
-![Screenshot del Gioco](inserisci_qui_link_immagine.png)
+Purgatorio RPG è un'avventura narrativa ed esplorativa con visuale top-down. Il giocatore impersona un'entità spettrale intrappolata, costretta ad affrontare i rimorsi del proprio passato tramite scelte morali (Karma) e combattimenti a turni basati sull'intelligenza emotiva.
+
+<p align="center">
+<img width="798" height="647" alt="Gameplay Purgatorio RPG" src="https://github.com/user-attachments/assets/98ad51b7-972b-4a24-8071-b3f128105acf" />
+</p>
 
 ---
 
-## 🚀 Come eseguire il progetto
+## Come eseguire il progetto
 
 ### Prerequisiti
-- Java 25 (LTS)
-- Groovy
-- Gradle
+* Java 25 (LTS)
+* Gradle
 
 ### Istruzioni
-```bash
-git clone [https://github.com/TuoUsername/PurgatorioRPG.git](https://github.com/TuoUsername/PurgatorioRPG.git)
-cd PurgatorioRPG
 
+```bash
+git clone https://github.com/iRqven/progetto-rpg-129543.git
+cd progetto-rpg-129543
 ```
 
-### Build del progetto
+### Build ed Esecuzione
+
+Per aggirare le problematiche legate ai moduli JavaFX, il punto di ingresso principale è situato in una classe separata (`Launcher`):
 
 ```bash
 ./gradlew build
-
-```
-
-### Esecuzione
-
-Per aggirare le problematiche legate ai moduli JavaFX, il punto di ingresso principale è situato in una classe separata:
-
-```bash
 ./gradlew run
-
 ```
 
 *(In alternativa, eseguire la classe `it.unicam.cs.mpgc.rpg129543.Launcher` direttamente da IntelliJ IDEA).*
 
 ---
 
-## 🤖 Uso di strumenti di AI
+## Uso di strumenti di AI
 
-L'uso dell'AI è stato mirato al refactoring architetturale, alla code-review e all'apprendimento delle best practice relative al Clean Code, mantenendo la paternità logica del progetto originale.
+L'uso dell'AI è stato mirato al refactoring architetturale, alla code-review e all'apprendimento delle best practice relative al Clean Code e ai principi SOLID, mantenendo la paternità logica e le scelte di design del progetto originale.
 
-* Utilizzato Gemini per:
-* Comprendere e applicare concetti teorici (Design Pattern, principi SOLID).
+Sono stati utilizzati modelli linguistici di intelligenza artificiale per:
 
+* Comprendere e applicare concetti teorici avanzati (Design Pattern, principi SOLID).
+* Effettuare code-review e refactoring strutturale per eliminare l'anti-pattern "God Object" (es. suddivisione di `GameRouter`), disaccoppiare la logica di dominio dalla UI e sostituire il type-checking con enum e polimorfismo (`ChallengeType`).
+* Individuare bug concreti durante la revisione.
+* Ottimizzare la generazione casuale e procedurale delle entità sulla mappa, introducendo l'astrazione `RandomSource` per la testabilità.
 
-* Refactoring strutturale per eliminare "God Object" e disaccoppiare la logica dalla UI.
-
-
-* Ottimizzazione della generazione casuale delle entità sulla mappa.
-
-
-
-
+Una dichiarazione dettagliata, con l'indicazione precisa di quale strumento è stato usato per quale parte del lavoro, è disponibile nella Wiki del repository, come richiesto dalla consegna.
 
 ---
 
-## ⚠️ Nota
+## Nota sugli Asset
 
-Gli asset grafici (sprite del personaggio, sfondi delle stanze e frammenti) sono stati [inserisci qui la fonte degli asset, es. disegnati su Figma / presi da itch.io].
-
----
-
-## 🎮 Funzionalità Presenti
-
-* Movement System fluido da tastiera (W, A, S, D / Frecce) limitato entro la "Safe Zone" della mappa.
-
-
-* Generazione procedurale delle posizioni di Boss e Frammenti (con controlli anti-sovrapposizione).
-
-
-* Sistema di combattimento a turni con debolezze basate sugli stati emotivi (Rabbia, Paura, Colpa).
-
-
-* Eventi stocastici e "Anomalie" durante la battaglia che offrono bivi morali.
-
-
-* Zainetto Spirituale (Inventario) per la raccolta dei frammenti di lore.
-
-
-* Finali multipli basati sul punteggio di Karma accumulato.
-
-
+Gli asset grafici (sprite del personaggio, sfondi delle stanze e frammenti) sono stati generati tramite intelligenza artificiale (Gemini), seguendo rigorosamente il worldbuilding narrativo e le atmosfere del gioco.
 
 ---
 
-## ⚙️ Note Tecniche
+## Funzionalità Presenti
 
-Per questo progetto d'esame (Informatica per la Comunicazione Digitale) è stato fatto un uso rigoroso dell'architettura **MVC (Model View Controller)**, garantendo una netta separazione tra la logica di dominio e il rendering grafico in JavaFX.
-
-Sono stati inoltre implementati:
-
-* **Factory Pattern** (`RoomFactory`) per l'istanziazione modulare dei livelli.
-
-
-* **DTO (Data Transfer Object)** (`ChallengeResult`, `RoomConfig`) per far comunicare in modo sicuro Modello e Controller.
-
-
-* Architettura a **Callback (Lambda)** per il routing dinamico dei menu.
-
-
+* **Movement System:** Movimento fluido da tastiera (W, A, S, D / Frecce) limitato entro la "Safe Zone" della mappa.
+* **Generazione procedurale:** Calcolo stocastico per lo spawn di Boss e Frammenti con rigidi controlli anti-sovrapposizione.
+* **Sistema di combattimento emotivo:** Battaglie a turni con debolezze basate sugli stati emotivi (Rabbia, Paura, Colpa).
+* **Anomalie e Bivi Morali:** Eventi casuali durante la battaglia che offrono scelte narrative.
+* **Zainetto Spirituale:** Inventario per la raccolta dei frammenti di lore. Il ritrovo di memorie già note innesca una *Risonanza Spirituale* che cura il giocatore.
+* **Persistenza JSON:** Sistema di salvataggio e caricamento automatico delle statistiche del giocatore.
+* **Dannazione Ciclica:** Finali multipli basati sul Karma. La mancanza di redenzione innesca un loop in cui le statistiche vengono mantenute ma la difficoltà dei boss scala.
 
 ---
 
-## 📋 TODO
+## Note Tecniche e Architettura
 
-### In Sviluppo
+Per questo progetto d'esame è stato fatto un uso rigoroso dell'architettura **MVC (Model-View-Controller)** e dei principi **SOLID**, garantendo una netta separazione tra la logica di dominio e il rendering grafico in JavaFX.
 
-* Copertura totale dei test di unità (JUnit 5) per il Modello (`Player`, `Room`, `BattleEngine`).
+Sono stati implementati i seguenti pattern e metodologie:
 
+* **Router Pattern:** `GameRouter` centralizza la navigazione tra le schermate e la gestione degli overlay è a sua volta delegata a `OverlayManager`, per rispettare la Single Responsibility.
+* **Factory Pattern (`RoomFactory`):** Istanziazione modulare dei livelli e iniezione della narrativa.
+* **DTO (Data Transfer Object):** Classi come `ChallengeResult` e record come `RoomConfig` trasferiscono dati in modo pulito tra Modello e Controller senza formattazione visiva.
+* **Dependency Inversion:** Anziché far comunicare la logica di dominio direttamente con le finestre visive o con la generazione procedurale, sono state introdotte delle interfacce intermedie (`RandomSource`, `BattleCallbacks`, `GameNavigationCallbacks`). Questo garantisce che i Controller e i Model non sappiano nulla di JavaFX, facilitando enormemente i test unitari e le modifiche future.
+* **Eliminazione del Type Checking:** Adozione dell'enum `ChallengeType` al posto di flag booleani, per una gestione polimorfica delle sfide.
+* **Test Unitari (JUnit 5):** Copertura dei comportamenti fondamentali del Modello (`Player`, `Enemy`, `Room`), resa possibile e deterministica grazie all'iniezione della dipendenza `RandomSource`.
 
-* Sistema di salvataggio/caricamento tramite `PersistenceManager` su formato JSON.
+### Estendibilità
 
+La logica di dominio (package `model` e `controller`) non dipende da JavaFX se non nel punto di contatto con la `view`, tramite le interfacce di callback sopra citate. Questo rende possibile in futuro sostituire l'interfaccia grafica (ad esempio con un client mobile o web) riutilizzando model e controller così come sono.
 
+---
+
+## TODO & Sviluppi Futuri
 
 ### Pianificati
 
 * Aggiunta di un comparto sonoro e colonna sonora ambientale (tramite `AudioClip`).
 
-
-
 ### Possibili Miglioramenti Futuri
 
 * Animazioni di attacco specifiche per ogni nemico.
-
-
 * Nuovi piani esplorabili oltre al settimo.
-
-
-
-```
-
-```

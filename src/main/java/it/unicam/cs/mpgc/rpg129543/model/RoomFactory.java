@@ -1,7 +1,9 @@
 package it.unicam.cs.mpgc.rpg129543.model;
 
+import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.util.DefaultRandomSource;
 import it.unicam.cs.mpgc.rpg129543.util.RandomSource;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class RoomFactory {
                 new RoomConfig(DOOR_X, DOOR_Y, "Un suono acuto ti trapassa i timpani. Una banchina affollata. Qualcuno urlava di non oltrepassare il limite.", true, "backgrounds/bg_0.jpg", "doors/door_0.png", "fragments/fragment_0.png"), random));
 
         rooms.add(new Room(1, "Piano 2: L'Invidia",
-                "L'aria sa di ferro e freni bruciati, tingendosi di un verde acido. Una figura con una giacca da ufficio strappata ti sbarra la strada.",
+                "L'aria sa di ferro e freni bruciati, tingendosi di un verde acido.",
                 new CombatChallenge("Lo Spettro del Socio Tradito",
                         "Sento l'odore dell'inchiostro fresco sui miei progetti... quelli che hai firmato tu. Ogni volta che torni, la cicatrice brucia. Guardati: cerchi una via d'uscita rubando i meriti altrui, ma questa nebbia non puoi frodarla.",
                         "Hai rubato la mia firma! Questa prigione di nebbia è opera tua!",

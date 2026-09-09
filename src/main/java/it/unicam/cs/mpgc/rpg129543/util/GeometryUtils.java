@@ -1,9 +1,6 @@
 package it.unicam.cs.mpgc.rpg129543.util;
 
-/**
- * Funzioni geometriche condivise. Prima il calcolo della distanza euclidea
- * era duplicato identico in GameController e in Room (violazione DRY).
- */
+/** Funzioni geometriche condivise tra model e controller. */
 public final class GeometryUtils {
 
     private GeometryUtils() {

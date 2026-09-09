@@ -7,13 +7,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Gestore centralizzato degli asset grafici con supporto al ritaglio dei fogli di sprite (Sprite Sheet).
- *
- * NOTA: prima gli errori di caricamento venivano inghiottiti silenziosamente
- * (catch generico che restituiva null senza traccia). Questo rende invisibile
- * un asset mancante o un bug reale: ora viene stampato un avviso sullo standard error.
- */
+/** Gestore centralizzato degli asset grafici, con cache e ritaglio da sprite sheet. */
 public class AssetManager {
     private static final Map<String, Image> imageCache = new HashMap<>();
 
@@ -21,12 +15,9 @@ public class AssetManager {
     }
 
     public static Image getImage(String fileName) {
-        return getImage(fileName, 0, 0, 0, 0); // Caricamento intero standard
+        return getImage(fileName, 0, 0, 0, 0);
     }
 
-    /**
-     * Carica un'immagine o ritaglia una porzione specifica (utile per gli sprite sheet a griglia).
-     */
     public static Image getImage(String fileName, int x, int y, int width, int height) {
         String cacheKey = fileName + "_" + x + "_" + y + "_" + width + "_" + height;
         if (imageCache.containsKey(cacheKey)) {
@@ -44,7 +35,6 @@ public class AssetManager {
             Image fullImage = new Image(is);
             Image resultImg;
 
-            // Se vengono passate dimensioni valide, ritaglia il singolo frame dallo sheet
             if (width > 0 && height > 0) {
                 resultImg = new WritableImage(fullImage.getPixelReader(), x, y, width, height);
             } else {

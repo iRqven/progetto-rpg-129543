@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg129543.model;
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
+
 import java.util.Objects;
 
 public class NarrativeChallenge implements Challenge {
@@ -26,7 +27,7 @@ public class NarrativeChallenge implements Challenge {
     }
 
     @Override
-    public boolean isCompletata() { return this.completata; }
+    public boolean isCompletata() { return completata; }
 
     @Override
     public ChallengeType getTipo() { return ChallengeType.NARRATIVE; }

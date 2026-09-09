@@ -7,8 +7,6 @@ import java.util.Objects;
 public class Player {
     private static final double VELOCITA_MOVIMENTO = 5.0;
 
-    // Prima questi valori erano tutti letterali sparsi dentro addXp() (100, 2, 1.5, 5, 10):
-    // estratti in costanti con nome per rendere leggibile la formula di crescita.
     private static final int HP_BASE = 100;
     private static final int STAT_BASE = 10;
     private static final int STAT_GROWTH_PER_LEVEL = 2;
@@ -38,6 +36,14 @@ public class Player {
 
     private int runCorrente = 1;
     private boolean tutorialLivelloVisto = false;
+    private int pianoCorrente = 0;
+
+    /** Richiesto da Jackson per la deserializzazione da JSON. */
+    private Player() {
+        this.nome = "Anima";
+        this.classe = "Ombra";
+        this.allineamento = "Viandante";
+    }
 
     public Player(String nome, String classe, String allineamento) {
         this.nome = Objects.requireNonNull(nome, "Il nome non può essere nullo.");
@@ -70,6 +76,7 @@ public class Player {
         this.hp = this.hpMax;
         this.x = 100.0;
         this.y = 300.0;
+        this.pianoCorrente = 0;
     }
 
     public void moveUp() { this.y -= VELOCITA_MOVIMENTO; }
@@ -102,6 +109,8 @@ public class Player {
     public int getRunCorrente() { return runCorrente; }
     public boolean isTutorialLivelloVisto() { return tutorialLivelloVisto; }
     public void setTutorialLivelloVisto(boolean tutorialLivelloVisto) { this.tutorialLivelloVisto = tutorialLivelloVisto; }
+    public int getPianoCorrente() { return pianoCorrente; }
+    public void setPianoCorrente(int pianoCorrente) { this.pianoCorrente = pianoCorrente; }
 
     @Override
     public boolean equals(Object obj) {

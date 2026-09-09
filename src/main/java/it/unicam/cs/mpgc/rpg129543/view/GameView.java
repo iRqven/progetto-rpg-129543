@@ -26,6 +26,8 @@ public class GameView {
     private Rectangle hpBar;
     private static final double HP_BAR_WIDTH = 40;
 
+    private HudView hudView;
+
     private int frameIndex = 0;
     private long lastFrameTime = 0;
 
@@ -87,7 +89,8 @@ public class GameView {
         }
     }
 
-    public GameView(Player player) {
+    public GameView(Player player, HudView hudView) {
+        this.hudView = hudView; // SALVA IL RIFERIMENTO
         gameArea = new Pane();
         gameArea.setPrefSize(800, 600);
         createPlayerGraphics(player);
@@ -133,6 +136,13 @@ public class GameView {
             gameArea.setBackground(new Background(bgImage));
         } else {
             gameArea.setStyle("-fx-background-color: #7f7f7f;");
+        }
+    }
+
+    public void setHudVisible(boolean visible) {
+        if (hudView != null) {
+            hudView.getHudNode().setVisible(visible);
+            hudView.getHudNode().setManaged(visible);
         }
     }
 

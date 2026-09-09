@@ -18,13 +18,13 @@ javafx {
 }
 
 dependencies {
-    // Jackson per la persistenza JSON (richiesto nel tuo module-info)
+    // Jackson per la persistenza JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
 
+    // JUnit 5 per i test
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

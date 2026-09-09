@@ -3,13 +3,7 @@ package it.unicam.cs.mpgc.rpg129543.model;
 import it.unicam.cs.mpgc.rpg129543.util.GeometryUtils;
 import it.unicam.cs.mpgc.rpg129543.util.RandomSource;
 
-/**
- * Responsabile esclusivamente del calcolo delle posizioni casuali di spawn
- * all'interno di una stanza. Prima questa logica (calcolaInRange, calcolaDistanza,
- * e il ciclo do/while di "riprova finché non sei abbastanza lontano") viveva
- * dentro il costruttore di Room, che quindi si occupava sia di essere un
- * contenitore dati sia di generare coordinate: due responsabilità distinte.
- */
+/** Calcola le posizioni casuali di spawn di NPC e frammento all'interno di una stanza. */
 class SpawnPositionGenerator {
     private static final double MIN_SPAWN_X = 200.0;
     private static final double MAX_SPAWN_X = 600.0;

@@ -3,8 +3,10 @@ package it.unicam.cs.mpgc.rpg129543.model;
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
+import it.unicam.cs.mpgc.rpg129543.util.DefaultRandomSource;
+import it.unicam.cs.mpgc.rpg129543.util.RandomSource;
+
 import java.util.Objects;
-import java.util.Random;
 
 public class SkillCheckChallenge implements Challenge {
     private static final int SOGLIA_DIFFICOLTA = 12;
@@ -12,11 +14,16 @@ public class SkillCheckChallenge implements Challenge {
     private static final int MAX_DICE = 20;
 
     private final String dialogo;
-    private final Random random = new Random();
+    private final RandomSource random;
     private boolean completata = false;
 
     public SkillCheckChallenge(String dialogo) {
+        this(dialogo, new DefaultRandomSource());
+    }
+
+    public SkillCheckChallenge(String dialogo, RandomSource random) {
         this.dialogo = Objects.requireNonNull(dialogo, "Il dialogo iniziale non può essere nullo.");
+        this.random = Objects.requireNonNull(random, "La sorgente casuale non può essere nulla.");
     }
 
     public String getDialogo() { return dialogo; }
@@ -27,19 +34,26 @@ public class SkillCheckChallenge implements Challenge {
     @Override
     public ChallengeResult risolvi(Player player, int pianoId) {
         Objects.requireNonNull(player, "Il giocatore non può essere nullo.");
-        if (completata) return new ChallengeResult(true, "L'eco del passato si è spento tra i binari.", 0, "");
+        if (completata) {
+            return new ChallengeResult(true, "L'eco del passato si è spento tra i binari.", 0, "");
+        }
 
         int tiro = random.nextInt(MAX_DICE) + 1;
         boolean successo = (tiro + player.getLivello()) >= SOGLIA_DIFFICOLTA;
         this.completata = true;
 
-        String stringaLancio = "Lancio: " + tiro + " + Liv. " + player.getLivello() + (successo ? " >= " : " < ") + SOGLIA_DIFFICOLTA;
+        String stringaLancio = "Lancio: " + tiro + " + Liv. " + player.getLivello()
+                + (successo ? " >= " : " < ") + SOGLIA_DIFFICOLTA;
 
         if (successo) {
             player.addKarma(BONUS_KARMA);
-            return new ChallengeResult(true, "Hai trovato la forza di superare il tuo egoismo. Ottieni +" + BONUS_KARMA + " Karma.", tiro, stringaLancio);
+            return new ChallengeResult(true,
+                    "Hai trovato la forza di superare il tuo egoismo. Ottieni +" + BONUS_KARMA + " Karma.",
+                    tiro, stringaLancio);
         }
-        return new ChallengeResult(false, "L'esitazione cinica ti blocca. La figura svanisce lasciandoti solo con le tue colpe.", tiro, stringaLancio);
+        return new ChallengeResult(false,
+                "L'esitazione cinica ti blocca. La figura svanisce lasciandoti solo con le tue colpe.",
+                tiro, stringaLancio);
     }
 
     @Override

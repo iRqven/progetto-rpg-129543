@@ -1,12 +1,20 @@
 package it.unicam.cs.mpgc.rpg129543.view;
 
+import it.unicam.cs.mpgc.rpg129543.util.GameplayConstants;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
 
+/** Factory dei menu overlay mostrati durante l'esplorazione e il giudizio finale. */
 public class UIManager {
+
+    private static final double OVERLAY_WIDTH = 520;
+    private static final double OVERLAY_HEIGHT = 420;
+    private static final double DIALOG_MAX_WIDTH = 480;
+    private static final double FINAL_JUDGMENT_MAX_WIDTH = 740;
+
     public static VBox createNarrativeMenu(String title, String message, Runnable onProceed) {
         VBox overlay = createBaseOverlay();
 
@@ -40,58 +48,57 @@ public class UIManager {
     }
 
     private static VBox createBaseOverlay() {
-        VBox overlay = new VBox(20);
+        VBox overlay = new VBox(15);
         overlay.setAlignment(Pos.CENTER);
-        overlay.setPrefSize(450, 350);
-        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.95); -fx-border-color: #f1c40f; -fx-padding: 25; -fx-border-radius: 15; -fx-border-width: 2;");
+        overlay.setPrefSize(OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.96); -fx-border-color: #f1c40f; -fx-padding: 20; -fx-border-radius: 15; -fx-border-width: 2;");
         return overlay;
     }
 
     private static Label createStyledLabel(String text, String color, int size) {
         Label label = new Label(text);
-        label.setStyle("-fx-text-fill: " + color + "; -fx-font-size: " + size + "px; -fx-font-weight: bold;");
+        label.setStyle("-fx-text-fill: " + color + "; -fx-font-size: " + size + "px; -fx-font-weight: bold; -fx-text-alignment: center;");
+        label.setWrapText(true);
         return label;
     }
 
     private static Label createDialogLabel(String text) {
         Label dialog = new Label(text);
-        dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
+        dialog.setStyle("-fx-text-fill: white; -fx-font-style: italic; -fx-text-alignment: center; -fx-font-family: 'Georgia'; -fx-font-size: 13px;");
         dialog.setWrapText(true);
-        dialog.setMaxWidth(400);
+        dialog.setMaxWidth(DIALOG_MAX_WIDTH);
         return dialog;
     }
 
     public static VBox createBattleTutorialMenu(String nomeBoss, String descBoss, int playerLevel, Runnable onStart) {
-        // CORREZIONE GRAFICA: Usiamo il layout base con sfondo nero e bordi invece di un VBox vuoto
         VBox layout = createBaseOverlay();
 
-        Label t = new Label("SVELAMENTO DELLA VITTIMA: " + nomeBoss.toUpperCase());
-        t.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 15px; -fx-font-family: 'Courier New';");
+        Label t = new Label("SVELAMENTO DELLA VITTIMA:\n" + nomeBoss.toUpperCase());
+        t.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Courier New'; -fx-text-alignment: center;");
+        t.setWrapText(true);
 
         Label desc = createDialogLabel(descBoss);
-        desc.setMaxWidth(420);
+        desc.setMaxWidth(480);
 
         VBox tutorialBox = new VBox(5);
         tutorialBox.setAlignment(Pos.CENTER);
 
         if (playerLevel == 1) {
             Label tutTitolo = new Label("[REGISTRO DELLE DEBOLEZZE EMOTIVE]");
-            tutTitolo.setStyle("-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 12px; -fx-font-family: 'Courier New';");
+            tutTitolo.setStyle("-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 11px; -fx-font-family: 'Courier New';");
             Label tutDesc = new Label(
-                    "Durante lo scontro, seleziona la Virtù che contrasta l'Aura cromatico-emotiva della vittima:\n" +
-                            "• Se lo stato è RABBIA -> Sferra PAZIENZA\n" +
-                            "• Se lo stato è PAURA  -> Sferra CORAGGIO\n" +
-                            "• Se lo stato è COLPA  -> Sferra PERDONO\n" +
-                            "Colpire l'Aura corretta raddoppia l'efficacia d'attacco e rigenera Volontà."
+                    "Seleziona la Virtù che contrasta l'Aura emotiva:\n" +
+                            "• RABBIA -> PAZIENZA | • PAURA -> CORAGGIO | • COLPA -> PERDONO\n" +
+                            "Colpire l'Aura corretta raddoppia i danni e rigenera Volontà."
             );
             tutDesc.setStyle("-fx-text-fill: #ecf0f1; -fx-font-size: 11px; -fx-text-alignment: center; -fx-font-family: 'Georgia';");
             tutDesc.setWrapText(true);
-            tutDesc.setMaxWidth(420);
+            tutDesc.setMaxWidth(480);
             tutorialBox.getChildren().addAll(tutTitolo, tutDesc);
         }
 
         Button startBtn = new Button("Inizia il Combattimento");
-        startBtn.setStyle("-fx-base: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-min-height: 40;");
+        startBtn.setStyle("-fx-base: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 200; -fx-min-height: 35;");
         startBtn.setOnAction(e -> onStart.run());
 
         layout.getChildren().addAll(t, desc, tutorialBox, startBtn);
@@ -101,11 +108,12 @@ public class UIManager {
     public static VBox createSkillCheckMenu(String title, String message, Runnable onRoll) {
         VBox overlay = createBaseOverlay();
 
-        Label name = createStyledLabel(title, "#f39c12", 20);
+        Label name = createStyledLabel(title, "#f39c12", 18);
         Label dialog = createDialogLabel(message);
 
         Label explanation = new Label("La redenzione richiede uno sforzo: lancia il dado del destino (D20 + Livello).");
-        explanation.setStyle("-fx-text-fill: #bdc3c7; -fx-font-size: 12px; -fx-font-family: 'Courier New'; -fx-font-weight: bold;");
+        explanation.setStyle("-fx-text-fill: #bdc3c7; -fx-font-size: 11px; -fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-text-alignment: center;");
+        explanation.setWrapText(true);
 
         Button rollBtn = new Button("LANCIA IL DADO");
         rollBtn.setStyle("-fx-base: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -131,28 +139,28 @@ public class UIManager {
                         "Questo non è un Purgatorio che porta alla salvezza. Questo è un dispositivo psicologico eterno: " +
                         "la tua coscienza è condannata a rivivere la sua stessa colpa all'infinito, intrappolata in un crudele loop temporale.\""
         );
-        rivelazioneGiudice.setMaxWidth(720);
+        rivelazioneGiudice.setMaxWidth(FINAL_JUDGMENT_MAX_WIDTH);
 
         Label esitoCondanna = new Label();
         String styleCondanna = "-fx-font-size: 12px; -fx-font-weight: bold; -fx-font-family: 'Courier New'; -fx-text-alignment: center;";
         Button azioneBtn = new Button();
         String styleBtn = "-fx-min-width: 280; -fx-min-height: 40; -fx-font-weight: bold; -fx-font-size: 12px;";
 
-        if (karma >= 40) {
+        if (karma >= GameplayConstants.KARMA_THRESHOLD_GOOD_ENDING) {
             esitoCondanna.setText("• EPILOGO: L'OBLIO ASSOLUTO (Karma Alto) •\nHai cercato la via della bontà, ma la redenzione è impossibile per chi ha seminato morte. Il Giudice ti concede l'unica vera pace: la cancellazione. La tua anima e i tuoi ricordi vengono annientati, scomparendo nel nulla, come se non fossi mai esistito.");
             esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #3498db;");
-            azioneBtn.setText("Accetta l'Oblio (Hard Reset Totale)");
+            azioneBtn.setText("Accetta l'Oblio");
             azioneBtn.setStyle(styleBtn + "-fx-base: #2980b9; -fx-text-fill: white;");
-            azioneBtn.setOnAction(e -> onRestart.run()); // Azzeramento totale
+            azioneBtn.setOnAction(e -> onRestart.run());
         } else {
             esitoCondanna.setText("• EPILOGO: LA DANNAZIONE CICLICA (Karma Basso) •\nHai scelto l'indifferenza e la violenza. Il Giudice sorride: la maschera è caduta. La stazione si resetta e i morti si rialzano. Tornerai all'ingresso del Purgatorio conservando la tua rabbia, i tuoi livelli e i tuoi tristi ricordi, condannato ad affrontare un ciclo ancora più violento.");
             esitoCondanna.setStyle(styleCondanna + "-fx-text-fill: #c0392b;");
-            azioneBtn.setText("Ricomincia il Ciclo (Mantieni Statistiche: New Game+)");
+            azioneBtn.setText("Ricomincia il Ciclo");
             azioneBtn.setStyle(styleBtn + "-fx-base: #c0392b; -fx-text-fill: white;");
-            azioneBtn.setOnAction(e -> onLoop.run()); // Innesco del Loop "New Game+"
+            azioneBtn.setOnAction(e -> onLoop.run());
         }
         esitoCondanna.setWrapText(true);
-        esitoCondanna.setMaxWidth(720);
+        esitoCondanna.setMaxWidth(FINAL_JUDGMENT_MAX_WIDTH);
 
         endLayout.getChildren().addAll(titoloOrologio, rivelazioneGiudice, esitoCondanna, azioneBtn);
 

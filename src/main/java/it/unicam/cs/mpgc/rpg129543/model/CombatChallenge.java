@@ -3,22 +3,24 @@ package it.unicam.cs.mpgc.rpg129543.model;
 import it.unicam.cs.mpgc.rpg129543.api.Challenge;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeResult;
 import it.unicam.cs.mpgc.rpg129543.api.ChallengeType;
+
 import java.util.Objects;
 
 public class CombatChallenge implements Challenge {
     private final String nomeNemico;
     private final String descrizioneDettagliata;
-    private final String fRabbia;
-    private final String fPaura;
-    private final String fColpa;
+    private final String fraseRabbia;
+    private final String frasePaura;
+    private final String fraseColpa;
     private boolean completata;
 
-    public CombatChallenge(String nomeNemico, String descrizioneDettagliata, String fRabbia, String fPaura, String fColpa) {
+    public CombatChallenge(String nomeNemico, String descrizioneDettagliata,
+                           String fraseRabbia, String frasePaura, String fraseColpa) {
         this.nomeNemico = Objects.requireNonNull(nomeNemico);
         this.descrizioneDettagliata = descrizioneDettagliata;
-        this.fRabbia = fRabbia;
-        this.fPaura = fPaura;
-        this.fColpa = fColpa;
+        this.fraseRabbia = fraseRabbia;
+        this.frasePaura = frasePaura;
+        this.fraseColpa = fraseColpa;
         this.completata = false;
     }
 
@@ -33,10 +35,12 @@ public class CombatChallenge implements Challenge {
     @Override
     public ChallengeType getTipo() { return ChallengeType.COMBAT; }
 
-    public void setCompletata(boolean completata) { this.completata = completata; }
+    @Override
+    public void markCompleted() { this.completata = true; }
+
     public String getNomeNemico() { return nomeNemico; }
     public String getDescrizioneDettagliata() { return descrizioneDettagliata; }
-    public String getfRabbia() { return fRabbia; }
-    public String getfPaura() { return fPaura; }
-    public String getfColpa() { return fColpa; }
+    public String getFraseRabbia() { return fraseRabbia; }
+    public String getFrasePaura() { return frasePaura; }
+    public String getFraseColpa() { return fraseColpa; }
 }

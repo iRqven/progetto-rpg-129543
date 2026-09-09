@@ -9,17 +9,10 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * Classe principale dell'applicazione per Purgatorio RPG.
- * Purificata tramite il pattern Router: funge unicamente da Bootstrapper
- * per la Dependency Injection e l'inizializzazione del GameLoop.
- */
 public class PurgatorioApp extends Application {
-
     private Player player;
     private GameState gameState;
     private final PersistenceManager persistence = new PersistenceManager();
-
     private GameLoopController gameLoop;
     private GameRouter router;
     private Stage mainStage;
@@ -42,74 +35,57 @@ public class PurgatorioApp extends Application {
     }
 
     private void setupUI() {
-        GameView gameView = new GameView(player);
         HudView hudView = new HudView(() -> {
             if (router != null) router.showMemoryArchive();
         });
 
+        GameView gameView = new GameView(player, hudView);
         VBox root = new VBox(hudView.getHudNode(), gameView.getGameArea());
         root.setStyle("-fx-background-color: #000;");
         Scene scene = new Scene(root, 800, 650);
 
-        // 1. Inizializzazione del Router
+        // 1. Inizializzazione Router (Implementa le nuove interfacce di Callback)
         router = new GameRouter(player, gameState, gameView, hudView, persistence, this::resetGame, this::loopGame);
 
-        // 2. Inizializzazione dei Controller con instradamento delegato
+        // 2. Inizializzazione Controller
         InputController inputController = new InputController(scene,
                 router::togglePauseMenu,
                 router::showMemoryArchive
         );
 
-        BattleController battleController = new BattleController(
-                player, gameState,
-                router::mostraOverlayCentrato,
-                router::rimuoviOverlay,
-                router::aggiornaStanzaEHud,
-                router::showLevelUpNotification,
-                this::resetGame,
-                router::endInteraction,
-                () -> gameView.applyDamageEffect()
-        );
-
-        GameController gameController = new GameController(
-                player, gameState, gameView, hudView, inputController,
-                router::startCombatChoice,
-                router::startSkillCheckChoice,
-                router::startNarrativeChoice,
-                router::showLoreOnly,
-                router::showMemoryPopup,
-                () -> {
-                    router.aggiornaStanzaEHud();
-                    persistence.save(player);
-                    router.endInteraction();
-                },
-                router::showFinalJudgment
-        );
+        BattleController battleController = new BattleController(player, gameState, router);
+        GameController gameController = new GameController(player, gameState, gameView, hudView, inputController, router);
 
         // Connessione bidirezionale
         router.setControllers(gameController, battleController, inputController);
 
-        // 3. Avvio del metronomo
+        // 3. Avvio del Game Loop
         gameLoop = new GameLoopController(
                 gameController::update,
                 () -> gameView.renderPlayer(player)
         );
         gameLoop.startLoop();
-
         router.aggiornaStanzaEHud();
 
         if (player.getKarma() == 0 && player.getRicordi().isEmpty() && gameState.getCurrentRoom().id() == 0) {
             router.showIntro();
         }
 
-        mainStage.setTitle("Purgatorio RPG - Metodologie 2025/26");
+        mainStage.setTitle("Purgatorio RPG - Metodologie");
         mainStage.setScene(scene);
         mainStage.setResizable(false);
         mainStage.show();
     }
 
+    @Override
+    public void stop() {
+        // Metodo nativo chiamato da Platform.exit() o chiusura finestra
+        if (gameLoop != null) gameLoop.stopLoop();
+        persistence.save(player);
+    }
+
     private void resetGame() {
-        if (router != null) router.rimuoviOverlay();
+        if (router != null) router.chiudiOverlayCorrente();
         if (gameLoop != null) gameLoop.stopLoop();
 
         this.player = new Player("Anima", "Ombra", "Viandante");
@@ -122,7 +98,7 @@ public class PurgatorioApp extends Application {
     }
 
     private void loopGame() {
-        if (router != null) router.rimuoviOverlay();
+        if (router != null) router.chiudiOverlayCorrente();
         if (gameLoop != null) gameLoop.stopLoop();
 
         player.preparaPerNuovaRun();

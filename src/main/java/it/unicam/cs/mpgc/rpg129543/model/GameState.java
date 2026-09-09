@@ -4,13 +4,20 @@ import java.util.List;
 import java.util.Objects;
 
 public class GameState {
-    private static final int START_INDEX = 0;
     private final List<Room> rooms;
-    private int currentRoomIndex = START_INDEX;
+    private int currentRoomIndex;
 
     public GameState(Player player) {
-        Objects.requireNonNull(player, "Il giocatore non puo essere nullo.");
-        this.rooms = RoomFactory.createRooms();
+        this(player, RoomFactory.createRooms());
+    }
+
+    public GameState(Player player, List<Room> rooms) {
+        Objects.requireNonNull(player, "Il giocatore non può essere nullo.");
+        this.rooms = Objects.requireNonNull(rooms, "L'elenco delle stanze non può essere nullo.");
+        if (rooms.isEmpty()) {
+            throw new IllegalArgumentException("L'elenco delle stanze non può essere vuoto.");
+        }
+        this.currentRoomIndex = Math.clamp(player.getPianoCorrente(), 0, rooms.size() - 1);
     }
 
     public Room getCurrentRoom() { return rooms.get(currentRoomIndex); }

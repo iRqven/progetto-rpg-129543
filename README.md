@@ -2,7 +2,7 @@
 
 **Progetto d'esame per Informatica per la Comunicazione Digitale**
 *Università degli Studi di Camerino*
-*Sviluppato da: Nicoletta Ciaffoni (Matricola: 129543)*
+*Sviluppato da: Nicoletta Ciaffoni*
 
 Purgatorio RPG è un'avventura narrativa ed esplorativa con visuale top-down. Il giocatore impersona un'entità spettrale intrappolata, costretta ad affrontare i rimorsi del proprio passato tramite scelte morali (Karma) e combattimenti a turni basati sull'intelligenza emotiva.
 
@@ -54,8 +54,11 @@ Una dichiarazione dettagliata, con l'indicazione precisa di quale strumento è s
 ---
 
 ## Nota sugli Asset
-
-Gli asset grafici (sprite del personaggio, sfondi delle stanze e frammenti) sono stati generati tramite intelligenza artificiale (Gemini), seguendo rigorosamente il worldbuilding narrativo e le atmosfere del gioco.
+ 
+Gli asset grafici sono di due provenienze distinte:
+ 
+* **Sfondi delle stanze e frammenti di lore**: generati tramite intelligenza artificiale (Gemini), seguendo rigorosamente il worldbuilding narrativo e le atmosfere del gioco.
+* **Sprite del personaggio (maschile e femminile)**: reperiti da [itch.io](https://itch.io).
 
 ---
 

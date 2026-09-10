@@ -11,6 +11,13 @@ repositories {
     mavenCentral()
 }
 
+// Garantisce che il progetto venga compilato ed eseguito con Java 25 su qualsiasi
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 // Configurazione specifica per JavaFX
 javafx {
     version = "25"
@@ -31,6 +38,7 @@ dependencies {
 application {
     mainClass = 'it.unicam.cs.mpgc.rpg129543.Launcher'
 }
+
 test {
     useJUnitPlatform()
 }

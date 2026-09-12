@@ -40,7 +40,7 @@ Per aggirare le problematiche legate ai moduli JavaFX, il punto di ingresso prin
 
 ## Uso di strumenti di AI
 
-L'uso dell'AI è stato mirato al refactoring architetturale, alla code-review e all'apprendimento delle best practice relative al Clean Code e ai principi SOLID, mantenendo la paternità logica e le scelte di design del progetto originale.
+L'uso dell'AI è stato mirato al refactoring architetturale, alla code-review e all'apprendimento delle best practice relative al Clean Code e ai principi SOLID, mantenendo la logica e le scelte di design del progetto originale.
 
 Sono stati utilizzati modelli linguistici di intelligenza artificiale per:
 
@@ -65,7 +65,7 @@ Gli asset grafici sono di due provenienze distinte:
 ## Funzionalità Presenti
 
 * **Movement System:** Movimento fluido da tastiera (W, A, S, D / Frecce) limitato entro la "Safe Zone" della mappa.
-* **Generazione procedurale:** Calcolo stocastico per lo spawn di Boss e Frammenti con rigidi controlli anti-sovrapposizione.
+* **Generazione procedurale:** Calcolo casuale per lo spawn di Boss e Frammenti con rigidi controlli anti-sovrapposizione.
 * **Sistema di combattimento emotivo:** Battaglie a turni con debolezze basate sugli stati emotivi (Rabbia, Paura, Colpa).
 * **Anomalie e Bivi Morali:** Eventi casuali durante la battaglia che offrono scelte narrative.
 * **Zainetto Spirituale:** Inventario per la raccolta dei frammenti di lore. Il ritrovo di memorie già note innesca una *Risonanza Spirituale* che cura il giocatore.

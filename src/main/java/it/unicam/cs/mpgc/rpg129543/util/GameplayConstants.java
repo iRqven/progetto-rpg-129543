@@ -1,11 +1,7 @@
 package it.unicam.cs.mpgc.rpg129543.util;
 
-/**
- * Costanti di bilanciamento condivise tra più classi (controller/model),
- * per evitare valori "magici" duplicati in punti diversi del codice
- * (es. il valore 60 usato in almeno 5 punti di GameRouter/BattleController
- * per spostare il giocatore dopo un'interazione).
- */
+/** Costanti di bilanciamento condivise tra model e controller. */
+
 public final class GameplayConstants {
 
     private GameplayConstants() {

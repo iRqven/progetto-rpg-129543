@@ -47,7 +47,6 @@ public class EntityManager {
             double imgW = bossImg.getWidth();
             double imgH = bossImg.getHeight();
 
-            // IL BOSS È ALTO 110
             double displayH = 110.0;
             double displayW = displayH * (imgW / imgH);
 
@@ -103,7 +102,6 @@ public class EntityManager {
             double imgW = doorImg.getWidth();
             double imgH = doorImg.getHeight();
 
-            // AUMENTATA A 140 (prima era 85) in modo che sia più grande del boss (110)
             double targetHeight = 140.0;
             double targetWidth = targetHeight * (imgW / imgH);
 
